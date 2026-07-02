@@ -1,0 +1,519 @@
+/* ================================================================
+   POOVANAM MARKET — Premium Design System v3.0
+   Modern, Professional, Beautiful
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Sora:wght@400;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+/* ── Design Tokens ─────────────────────────────────────────── */
+:root {
+  /* Brand Colors */
+  --emerald-50:  #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-900: #064e3b;
+
+  /* Neutral */
+  --slate-50:  #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  /* Semantic */
+  --bg-base:    #f0f4f0;
+  --bg-surface: #ffffff;
+  --bg-subtle:  #f8faf8;
+  --text-primary:   #0f172a;
+  --text-secondary: #334155;
+  --text-muted:     #4b5563;
+
+  /* Shadows — Premium depth system */
+  --shadow-xs:  0 1px 2px 0 rgba(0,0,0,0.04);
+  --shadow-sm:  0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px -1px rgba(0,0,0,0.07);
+  --shadow-md:  0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg:  0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05);
+  --shadow-xl:  0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.05);
+  --shadow-2xl: 0 25px 50px -12px rgba(0,0,0,0.12);
+  --shadow-emerald: 0 8px 24px -4px rgba(16,185,129,0.25);
+  --shadow-premium: 0 40px 80px -20px rgba(0,0,0,0.10), 0 0 0 1px rgba(255,255,255,0.8) inset;
+
+  /* Radii */
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+  --radius-2xl: 40px;
+
+  /* Typography */
+  --font-sans:    'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Sora', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+/* ── Reset & Base ──────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 19.5px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(16,185,129,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(99,102,241,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.2);
+}
+
+/* ── Selection ─────────────────────────────────────────────── */
+::selection {
+  background: rgba(16,185,129,0.2);
+  color: var(--emerald-700);
+}
+
+/* ── Focus Ring ────────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--emerald-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus:not(:focus-visible) { outline: none; }
+
+/* ── Hide Number Spinners (Arrows) ────────────────────────── */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* ── Page Layout ───────────────────────────────────────────── */
+.page {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Login Page ────────────────────────────────────────────── */
+.page-login {
+  background: linear-gradient(140deg,
+    #f0fdf4 0%,
+    #ecfdf5 30%,
+    #f0f9ff 60%,
+    #fdf4ff 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* ── Main App Page ─────────────────────────────────────────── */
+.page-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(160deg, #f8faf8 0%, #f0f6f2 50%, #f5f8fc 100%);
+}
+
+/* ── Login Card ────────────────────────────────────────────── */
+.login-card {
+  width: 440px;
+  max-width: 95vw;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.8);
+  border-radius: var(--radius-2xl);
+  padding: 48px 40px 40px;
+  box-shadow:
+    0 32px 64px -12px rgba(0,0,0,0.10),
+    0 0 0 1px rgba(255,255,255,0.9) inset,
+    0 1px 0 rgba(255,255,255,1) inset;
+  position: relative;
+  z-index: 2;
+  animation: cardEntry 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cardEntry {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.glass-card {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.8);
+  border-radius: var(--radius-2xl);
+  box-shadow:
+    0 32px 64px -12px rgba(0,0,0,0.10),
+    0 0 0 1px rgba(255,255,255,0.9) inset;
+}
+
+/* ── Login Logo ────────────────────────────────────────────── */
+.login-logo-wrap {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo-icon {
+  font-size: 64px;
+  display: inline-block;
+  filter: drop-shadow(0 8px 20px rgba(16,185,129,0.4));
+  animation: floatIcon 4s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%       { transform: translateY(-12px) rotate(3deg); }
+}
+
+.login-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin-top: 14px;
+  background: linear-gradient(135deg, #064e3b 0%, #059669 40%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login-subtitle {
+  font-size: 0.875rem;
+  color: var(--slate-400);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* ── Login Form ────────────────────────────────────────────── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--slate-50);
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  padding: 13px 16px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.field-group:focus-within {
+  border-color: var(--emerald-500);
+  box-shadow: 0 0 0 4px rgba(16,185,129,0.1);
+  background: white;
+}
+
+.field-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.field-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--slate-800);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.field-input::placeholder {
+  color: var(--slate-300);
+  font-weight: 400;
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn-primary {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 15px 24px;
+  color: white;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(16,185,129,0.35), 0 1px 0 rgba(255,255,255,0.15) inset;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16,185,129,0.45), 0 1px 0 rgba(255,255,255,0.15) inset;
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.btn-full { width: 100%; }
+.btn-icon { font-size: 18px; }
+
+/* ── Floating Petals ───────────────────────────────────────── */
+.petal {
+  position: absolute;
+  top: -40px;
+  pointer-events: none;
+  z-index: 0;
+  animation: petalFall linear infinite;
+  user-select: none;
+}
+
+@keyframes petalFall {
+  0%   { transform: translateY(-40px) rotate(0deg);     opacity: 0; }
+  8%   { opacity: 0.5; }
+  92%  { opacity: 0.4; }
+  100% { transform: translateY(110vh) rotate(540deg);   opacity: 0; }
+}
+
+/* ── Ripple Effect ─────────────────────────────────────────── */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: rgba(255,255,255,0.35);
+  border-radius: 50%;
+  transform: translate(-50%,-50%) scale(0);
+  animation: rippleAnim 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes rippleAnim {
+  to { transform: translate(-50%,-50%) scale(30); opacity: 0; }
+}
+
+/* ── Custom Scrollbar ──────────────────────────────────────── */
+.custom-scrollbar::-webkit-scrollbar       { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: var(--slate-100); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--slate-400); }
+
+/* ── Shadow Utilities ──────────────────────────────────────── */
+.shadow-premium { box-shadow: var(--shadow-premium); }
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tailwind-compatible animate-in helpers */
+.animate-in { animation-fill-mode: both; }
+.fade-in    { animation-name: fadeIn; }
+.zoom-in    { animation-name: zoomIn; }
+.zoom-in-95 { animation-name: zoomIn; }
+.slide-in-from-bottom-5  { animation-name: slideInFromBottom; }
+.slide-in-from-bottom-6  { animation-name: slideInFromBottom; }
+.duration-200  { animation-duration: 200ms; }
+.duration-300  { animation-duration: 300ms; }
+.duration-500  { animation-duration: 500ms; }
+.duration-700  { animation-duration: 700ms; }
+
+/* ── Print Styles ──────────────────────────────────────────── */
+@media print {
+  body * { visibility: hidden; }
+  #printable-content, #printable-content *,
+  #printable-invoice, #printable-invoice * {
+    visibility: visible !important;
+  }
+  #printable-content, #printable-invoice {
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%;
+  }
+  .no-print, .print-hide { display: none !important; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .login-card {
+    padding: 32px 24px 28px;
+  }
+  .login-title {
+    font-size: 1.3rem;
+  }
+}
+
+/* ── Global Readability & Contrast Enhancements ──────────────── */
+
+/* 1. Base Font Weights: make normal text Semi-Bold (600) by default */
+body, p, span, div, input, select, textarea, button, td, th, label, a, li {
+  font-weight: 600;
+}
+
+/* 2. Bold / Heading Elements: ensure they remain bold/heavy */
+strong, b, .font-bold, .font-semibold, .font-extrabold, .font-black, h1, h2, h3, h4, h5, h6, th {
+  font-weight: 800;
+}
+
+/* 3. Inline Font-Size Scaling (Targeting React absolute pixel styles) */
+[style*="font-size: 10px"], [style*="font-size:10px"] { font-size: 14px !important; }
+[style*="font-size: 11px"], [style*="font-size:11px"] { font-size: 15px !important; }
+[style*="font-size: 12px"], [style*="font-size:12px"] { font-size: 16.5px !important; }
+[style*="font-size: 13px"], [style*="font-size:13px"] { font-size: 17.5px !important; }
+[style*="font-size: 14px"], [style*="font-size:14px"] { font-size: 18.5px !important; }
+[style*="font-size: 15px"], [style*="font-size:15px"] { font-size: 19.5px !important; }
+[style*="font-size: 16px"], [style*="font-size:16px"] { font-size: 20.5px !important; }
+[style*="font-size: 18px"], [style*="font-size:18px"] { font-size: 22.5px !important; }
+[style*="font-size: 20px"], [style*="font-size:20px"] { font-size: 24.5px !important; }
+[style*="font-size: 22px"], [style*="font-size:22px"] { font-size: 26.5px !important; }
+[style*="font-size: 24px"], [style*="font-size:24px"] { font-size: 28.5px !important; }
+
+/* 4. Inline Font-Weight Scaling */
+[style*="font-weight: 400"], [style*="font-weight:400"] { font-weight: 600 !important; }
+[style*="font-weight: 500"], [style*="font-weight:500"] { font-weight: 700 !important; }
+[style*="font-weight: 600"], [style*="font-weight:600"] { font-weight: 800 !important; }
+[style*="font-weight: 700"], [style*="font-weight:700"] { font-weight: 900 !important; }
+[style*="font-weight: 800"], [style*="font-weight:800"] { font-weight: 900 !important; }
+[style*="font-weight: 900"], [style*="font-weight:900"] { font-weight: 900 !important; }
+
+/* 5. Inline Text-Color Contrast Enhancements */
+[style*="color: #64748b"], [style*="color:#64748b"] { color: var(--text-muted) !important; }
+[style*="color: #475569"], [style*="color:#475569"] { color: var(--text-secondary) !important; }
+[style*="color: #1e293b"], [style*="color:#1e293b"] { color: var(--text-primary) !important; }
+[style*="color: #374151"], [style*="color:#374151"] { color: #111827 !important; }
+[style*="color: #94a3b8"], [style*="color:#94a3b8"] { color: var(--text-secondary) !important; }
+
+/* 6. Hide main layout header during modal screens for cleaner and larger display */
+body.modal-open header,
+.page-main:has(div[style*="position: fixed"][style*="inset: 0"]) header,
+.page-main:has(div[style*="position:fixed"][style*="inset:0"]) header,
+.page-main:has(div[style*="position: fixed"][style*="inset:0"]) header,
+.page-main:has(div[style*="position:fixed"][style*="inset: 0"]) header {
+  display: none !important;
+}
+
+body.modal-open main,
+.page-main:has(div[style*="position: fixed"][style*="inset: 0"]) main,
+.page-main:has(div[style*="position:fixed"][style*="inset:0"]) main {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+/* 7. Toaster Animations */
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(50px) scale(0.9); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes toastSlideOut {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to { opacity: 0; transform: translateX(50px) scale(0.9); }
+}

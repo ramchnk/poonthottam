@@ -1,0 +1,229 @@
+const AbsentFarmerModule = (() => {
+  let _container = null;
+  let _db = null;
+  let tenantId = '';
+  let selectedDate = new Date().toISOString().split('T')[0];
+  let filterType = 'today'; // today, this-week, this-month, prev-month, this-year, custom
+  let searchQuery = '';
+
+  function init(container, db) {
+    _container = container;
+    _db = db;
+    tenantId = _db.currentTenant;
+    renderPage();
+  }
+
+  function getDateRange(preset) {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    switch (preset) {
+      case 'today':
+        return { from: ymd(now), to: ymd(now) };
+      case 'this-week': {
+        const d = new Date(now);
+        const day = d.getDay();
+        const diff = day === 0 ? -6 : 1 - day; // Monday start
+        d.setDate(d.getDate() + diff);
+        return { from: ymd(d), to: ymd(now) };
+      }
+      case 'this-month':
+        return { from: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`, to: ymd(now) };
+      case 'prev-month': {
+        const y = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+        const m = now.getMonth() === 0 ? 12 : now.getMonth();
+        const lastDay = new Date(y, m, 0).getDate();
+        return { from: `${y}-${pad(m)}-01`, to: `${y}-${pad(m)}-${lastDay}` };
+      }
+      case 'this-year':
+        return { from: `${now.getFullYear()}-01-01`, to: ymd(now) };
+      default:
+        return { from: selectedDate, to: selectedDate };
+    }
+  }
+
+  function getAbsentFarmers() {
+    const range = getDateRange(filterType);
+    
+    // 1. Load all registered farmers (using fmb_ prefix)
+    const farmersRaw = sessionStorage.getItem(`fmb_farmers_${tenantId}`);
+    const allFarmers = farmersRaw ? JSON.parse(farmersRaw) : [];
+
+    // 2. Load purchase/entry data to see who is PRESENT
+    const purchaseRaw = sessionStorage.getItem(`fmb_purchases_${tenantId}`);
+    const allPurchases = purchaseRaw ? JSON.parse(purchaseRaw) : [];
+
+    // 3. Filter purchases by selected range
+    const presentFarmerIds = new Set();
+    allPurchases.forEach(p => {
+      if (p.date >= range.from && p.date <= range.to) {
+        presentFarmerIds.add(p.farmerId);
+      }
+    });
+
+    // 4. Absent = All - Present
+    let absent = allFarmers.filter(f => !presentFarmerIds.has(f.id));
+
+    // 5. Apply Search
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      absent = absent.filter(f => 
+        String(f.name || '').toLowerCase().includes(q) || 
+        String(f.id || '').toLowerCase().includes(q)
+      );
+    }
+
+    return { absent, range };
+  }
+
+  function downloadCSV() {
+    const { absent } = getAbsentFarmers();
+    if (absent.length === 0) {
+      alert("No absent farmers found for this range.");
+      return;
+    }
+    
+    // Prepare data for Excel/CSV
+    const data = absent.map(f => ({
+      "Farmer ID": f.id,
+      "Name": f.name,
+      "Contact": f.contact || "",
+      "Location": f.location || "",
+      "Reg. Date": f.createdAt || ""
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Absent_Farmers");
+    XLSX.writeFile(wb, `Absent_Farmers_${filterType}_${new Date().toISOString().split('T')[0]}.csv`);
+  }
+
+  function sendWA(f) {
+    if (!f.contact) {
+      alert("No contact number available for this farmer.");
+      return;
+    }
+    const msg = encodeURIComponent(`Hello ${f.name}, we noticed you were absent recently at the Flower Market. Please let us know if you have produce ready for tomorrow. Regards.`);
+    const phone = f.contact.replace(/\D/g, '');
+    const finalPhone = phone.length === 10 ? '91' + phone : phone;
+    window.open(`https://wa.me/${finalPhone}?text=${msg}`, '_blank');
+  }
+
+  function renderPage() {
+    _container.innerHTML = `
+      <div class="fm-page-header">
+        <div class="fm-title-group">
+           <h1 class="fm-title">🚫 <span>${App.i18n.t('absentMgmt')}</span></h1>
+        </div>
+        <div class="fm-header-actions">
+          <button id="absent-wa-all-btn" class="fm-wa-btn ripple" style="background: #f0fdf4; border: 2px solid #25D366; color: #25D366; display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 12px; font-weight: 800; cursor: pointer;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            <span>WhatsApp</span>
+          </button>
+          <button id="absent-csv-btn" class="fm-btn-secondary ripple">📥 CSV</button>
+          <div class="fm-filter-group">
+            <select id="absent-date-preset" class="fm-select">
+              <option value="today" ${filterType === 'today' ? 'selected' : ''}>${App.i18n.t('today')}</option>
+              <option value="this-week" ${filterType === 'this-week' ? 'selected' : ''}>${App.i18n.t('thisWeek')}</option>
+              <option value="this-month" ${filterType === 'this-month' ? 'selected' : ''}>${App.i18n.t('thisMonth')}</option>
+              <option value="prev-month" ${filterType === 'prev-month' ? 'selected' : ''}>${App.i18n.t('lastMonth')}</option>
+              <option value="this-year" ${filterType === 'this-year' ? 'selected' : ''}>${App.i18n.t('thisYear')}</option>
+              <option value="custom" ${filterType === 'custom' ? 'selected' : ''}>${App.i18n.t('customDate')}</option>
+            </select>
+          </div>
+          <div id="custom-date-container" class="fm-filter-group ${filterType !== 'custom' ? 'hidden' : ''}">
+            <input type="date" id="absent-date-inp" class="fm-input" value="${selectedDate}">
+          </div>
+        </div>
+      </div>
+
+      <div class="fm-search-row" style="margin-bottom: 20px;">
+        <div class="fm-search-wrap">
+          <span class="fm-search-icon">🔍</span>
+          <input type="text" id="absent-search" class="fm-search-input" placeholder="${App.i18n.t('searchHint')}" value="${searchQuery}">
+        </div>
+        <div id="absent-range-info" class="fm-search-hint"></div>
+      </div>
+
+      <div class="fm-card glass-card">
+        <table class="fm-table">
+          <thead>
+            <tr>
+              <th>${App.i18n.t('id')}</th>
+              <th>${App.i18n.t('date')}</th>
+              <th>${App.i18n.t('name')}</th>
+              <th>${App.i18n.t('location')}</th>
+              <th>${App.i18n.t('status')}</th>
+            </tr>
+          </thead>
+          <tbody id="absent-list"></tbody>
+        </table>
+      </div>
+    `;
+
+    renderList();
+
+    // Events
+    _container.querySelector('#absent-wa-all-btn')?.addEventListener('click', () => {
+        const { absent, range } = getAbsentFarmers();
+        if (absent.length === 0) {
+            alert(App.i18n.t('noAbsentFound'));
+            return;
+        }
+        const names = absent.map(f => f.name).slice(0, 10).join(', ') + (absent.length > 10 ? '...' : '');
+        const msg = encodeURIComponent(`Absent Farmers (${range.from} to ${range.to}): ${names}`);
+        window.open(`https://wa.me/?text=${msg}`, '_blank');
+    });
+
+    _container.querySelector('#absent-csv-btn')?.addEventListener('click', downloadCSV);
+
+    const preset = _container.querySelector('#absent-date-preset');
+    preset.addEventListener('change', (e) => {
+      filterType = e.target.value;
+      if (filterType !== 'custom') {
+        _container.querySelector('#custom-date-container').classList.add('hidden');
+      } else {
+        _container.querySelector('#custom-date-container').classList.remove('hidden');
+      }
+      renderList();
+    });
+
+    _container.querySelector('#absent-date-inp').addEventListener('change', (e) => {
+      selectedDate = e.target.value;
+      renderList();
+    });
+
+    _container.querySelector('#absent-search').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderList();
+    });
+  }
+
+  function renderList() {
+    const list = _container.querySelector('#absent-list');
+    const rangeInfo = _container.querySelector('#absent-range-info');
+    const { absent, range } = getAbsentFarmers();
+
+    if (rangeInfo) {
+      rangeInfo.innerHTML = `${App.i18n.t('viewRange')}: <strong>${range.from}</strong> to <strong>${range.to}</strong>`;
+    }
+
+    if (absent.length === 0) {
+      list.innerHTML = `<tr><td colspan="5" class="fm-empty-state">${App.i18n.t('allPresent')}</td></tr>`;
+      return;
+    }
+
+    list.innerHTML = absent.map(f => `
+      <tr class="animate-fade-in">
+        <td><span class="fm-badge-id">${f.id}</span></td>
+        <td style="font-size: 0.85rem; color: var(--text-muted);">${f.createdAt || '—'}</td>
+        <td class="fm-semi-bold">${f.name}</td>
+        <td>${f.location ? App.i18n.t(f.location.toLowerCase()) : '—'}</td>
+        <td><span class="tag-absent">${App.i18n.t('absent')}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  return { init };
+})();
