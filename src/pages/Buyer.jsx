@@ -466,14 +466,6 @@ const Buyer = () => {
                                                     onMouseEnter={e => { if (!isHighlighted) { e.currentTarget.style.background='#3b82f6'; e.currentTarget.style.color='#fff'; } }}
                                                     onMouseLeave={e => { if (!isHighlighted) { e.currentTarget.style.background='#eff6ff'; e.currentTarget.style.color='#3b82f6'; } }}
                                                 ><Edit2 size={13}/></button>
-                                                <button style={{
-                                                    ...S.deleteBtn,
-                                                    background: isHighlighted ? 'rgba(255,255,255,0.2)' : '#fff1f2',
-                                                    color: isHighlighted ? '#fff' : '#f43f5e'
-                                                }} onClick={() => handleDelete(buyer.id)}
-                                                    onMouseEnter={e => { if (!isHighlighted) { e.currentTarget.style.background='#f43f5e'; e.currentTarget.style.color='#fff'; } }}
-                                                    onMouseLeave={e => { if (!isHighlighted) { e.currentTarget.style.background='#fff1f2'; e.currentTarget.style.color='#f43f5e'; } }}
-                                                ><Trash2 size={13}/></button>
                                             </div>
                                         </td>
                                     </tr>
