@@ -245,6 +245,7 @@ const OutsideShop = () => {
     const [bulkMode, setBulkMode] = useState('blank'); // 'blank' or 'filled'
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [viewingVendor, setViewingVendor] = useState(null);
+    const [viewingLedgerRow, setViewingLedgerRow] = useState(null);
     const [draftSelectedIndex, setDraftSelectedIndex] = useState(-1);
     const [purchaseSelectedIndex, setPurchaseSelectedIndex] = useState(-1);
 
@@ -1677,16 +1678,16 @@ const OutsideShop = () => {
                     
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         {/* Vendor filter */}
-                        <select
-                            value={purchaseFilterVendorId}
-                            onChange={e => setPurchaseFilterVendorId(e.target.value)}
-                            style={{ ...INPUT_S, width: 'auto', minWidth: '140px', padding: '6px 10px', fontSize: '12px', borderColor: purchaseFilterVendorId !== 'all' ? '#d97706' : '#e2e8f0', color: purchaseFilterVendorId !== 'all' ? '#92400e' : '#1e293b' }}
-                        >
-                            <option value="all">{t('allVendors') || 'All Vendors'}</option>
-                            {vendors.map(v => (
-                                <option key={v.id} value={v.id}>{v.name}</option>
-                            ))}
-                        </select>
+                        <div style={{ width: '180px' }}>
+                            <SearchSelect
+                                items={[{ id: 'all', name: t('allVendors') || 'All Vendors', nameTa: t('allVendors') || 'அனைத்து விற்பனையாளர்கள்' }, ...vendors]}
+                                value={purchaseFilterVendorId}
+                                onChange={v => setPurchaseFilterVendorId(v.id)}
+                                placeholder={t('vendorName')}
+                                idPrefix="V"
+                                lang={lang}
+                            />
+                        </div>
 
                         {/* All Dates Checkbox */}
                         <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b', cursor: 'pointer', fontWeight: 700 }}>
@@ -1886,7 +1887,6 @@ const OutsideShop = () => {
                                     <td style={{...TD_S, textAlign: 'center'}}>
                                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                             <button onClick={() => handleEditVendor(v)} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Pencil size={14}/></button>
-                                            <button onClick={() => handleDeleteVendor(v.id)} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #fee2e2', background: '#fff', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Trash2 size={14}/></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -2004,16 +2004,16 @@ const OutsideShop = () => {
                     
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         {/* Vendor filter */}
-                        <select
-                            value={payFilterVendorId}
-                            onChange={e => setPayFilterVendorId(e.target.value)}
-                            style={{ ...INPUT_S, width: 'auto', minWidth: '140px', padding: '6px 10px', fontSize: '12px', borderColor: payFilterVendorId !== 'all' ? '#7c3aed' : '#e2e8f0', color: payFilterVendorId !== 'all' ? '#5b21b6' : '#1e293b' }}
-                        >
-                            <option value="all">{t('allVendors') || 'All Vendors'}</option>
-                            {vendors.map(v => (
-                                <option key={v.id} value={v.id}>{v.name}</option>
-                            ))}
-                        </select>
+                        <div style={{ width: '180px' }}>
+                            <SearchSelect
+                                items={[{ id: 'all', name: t('allVendors') || 'All Vendors', nameTa: t('allVendors') || 'அனைத்து விற்பனையாளர்கள்' }, ...vendors]}
+                                value={payFilterVendorId}
+                                onChange={v => setPayFilterVendorId(v.id)}
+                                placeholder={t('vendorName')}
+                                idPrefix="V"
+                                lang={lang}
+                            />
+                        </div>
 
                         {/* All Dates Checkbox */}
                         <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b', cursor: 'pointer', fontWeight: 700 }}>
@@ -2225,12 +2225,16 @@ const OutsideShop = () => {
                             <label style={LABEL_S}>{t('toDate')}</label>
                             <input type="date" value={reportFilters.toDate} onChange={e => setReportFilters(p=>({...p, toDate: e.target.value}))} style={INPUT_S} />
                         </div>
-                        <div style={{ minWidth: '200px' }}>
+                        <div style={{ minWidth: '220px' }}>
                             <label style={LABEL_S}>{t('vendorName')}</label>
-                            <select value={reportFilters.vendorId} onChange={e => setReportFilters(p=>({...p, vendorId: e.target.value}))} style={INPUT_S}>
-                                <option value="all">{t('allVendors')}</option>
-                                {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-                            </select>
+                            <SearchSelect
+                                items={[{ id: 'all', name: t('allVendors') || 'All Vendors', nameTa: t('allVendors') || 'அனைத்து விற்பனையாளர்கள்' }, ...vendors]}
+                                value={reportFilters.vendorId}
+                                onChange={v => setReportFilters(p=>({...p, vendorId: v.id}))}
+                                placeholder={t('vendorName')}
+                                idPrefix="V"
+                                lang={lang}
+                            />
                         </div>
                     </div>
                     <div>
@@ -2397,7 +2401,7 @@ const OutsideShop = () => {
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
                                                         <span>{fmt(row.debit)}</span>
                                                         <button
-                                                            onClick={() => { setViewingVendor(v); setShowDetailModal(true); }}
+                                                            onClick={() => { setViewingVendor(v); setViewingLedgerRow(row); setShowDetailModal(true); }}
                                                             title={lang === 'ta' ? 'கொள்முதல் விவரம்' : 'View Purchases'}
                                                             style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#2563eb' }}
                                                         >
@@ -2482,9 +2486,129 @@ const OutsideShop = () => {
 
     const renderDetailModal = () => {
         if (!viewingVendor) return null;
-        const vPurchases = purchases.filter(p => p.vendorId === viewingVendor.id && p.date >= reportFilters.fromDate && p.date <= reportFilters.toDate).map(p => ({...p, type: 'PURCHASE'}));
-        const vPayments = payments.filter(p => p.entityId === viewingVendor.id && p.type === 'vendor' && p.date >= reportFilters.fromDate && p.date <= reportFilters.toDate).map(p => ({...p, type: 'PAYMENT'}));
-        const ledger = [...vPurchases, ...vPayments].sort((a,b) => new Date(b.date) - new Date(a.date) || (b.timestamp?.toMillis?.() || 0) - (a.timestamp?.toMillis?.() || 0));
+
+        // Fallback to old period ledger if viewingLedgerRow is not set
+        if (!viewingLedgerRow) {
+            const vPurchases = purchases.filter(p => p.vendorId === viewingVendor.id && p.date >= reportFilters.fromDate && p.date <= reportFilters.toDate).map(p => ({...p, type: 'PURCHASE'}));
+            const vPayments = payments.filter(p => p.entityId === viewingVendor.id && p.type === 'vendor' && p.date >= reportFilters.fromDate && p.date <= reportFilters.toDate).map(p => ({...p, type: 'PAYMENT'}));
+            const ledger = [...vPurchases, ...vPayments].sort((a,b) => new Date(b.date) - new Date(a.date) || (b.timestamp?.toMillis?.() || 0) - (a.timestamp?.toMillis?.() || 0));
+
+            return (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+                    <div style={{ background: '#fff', borderRadius: '24px', width: '900px', maxWidth: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #fed7aa' }}>
+                        <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb' }}>
+                            <div>
+                                <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 900, color: '#92400e' }}>{viewingVendor.name}</h2>
+                                <p style={{ margin: 0, fontSize: '12px', color: '#92400e', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Transaction Ledger</p>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto', marginRight: '20px' }}>
+                                <button 
+                                    onClick={() => handleDownloadVendorLedger(viewingVendor)}
+                                    title="Download Statement"
+                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fff', border: '1.5px solid #bfdbfe', padding: '8px 14px', borderRadius: '12px', cursor: 'pointer', color: '#2563eb', fontWeight: 700, fontSize: '13px', fontFamily: 'var(--font-sans)' }}
+                                >
+                                    <Download size={14} />
+                                    {lang === 'ta' ? 'பதிவிறக்கு' : 'Download'}
+                                </button>
+                                <button 
+                                    onClick={() => handlePrintVendorLedger(viewingVendor)}
+                                    title="Print Statement"
+                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fff', border: '1.5px solid #fed7aa', padding: '8px 14px', borderRadius: '12px', cursor: 'pointer', color: '#d97706', fontWeight: 700, fontSize: '13px', fontFamily: 'var(--font-sans)' }}
+                                >
+                                    <Printer size={14} />
+                                    {lang === 'ta' ? 'அச்சிடு' : 'Print'}
+                                </button>
+                                <button 
+                                    onClick={() => handleWhatsAppVendorLedger(viewingVendor)}
+                                    title="Share Statement"
+                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fff', border: '1.5px solid #bbf7d0', padding: '8px 14px', borderRadius: '12px', cursor: 'pointer', color: '#16a34a', fontWeight: 700, fontSize: '13px', fontFamily: 'var(--font-sans)' }}
+                                >
+                                    <WhatsAppIcon size={16} />
+                                    {lang === 'ta' ? 'வாட்ஸ்அப்' : 'WhatsApp'}
+                                </button>
+                            </div>
+                            <button onClick={() => { setShowDetailModal(false); setViewingVendor(null); }} style={{ background: '#fff', border: '1.5px solid #fed7aa', padding: '8px', borderRadius: '12px', cursor: 'pointer', color: '#92400e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20}/></button>
+                        </div>
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '24px 32px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '2px solid #f1f5f9' }}>
+                                        <th style={TH_S}>{lang === 'ta' ? 'பரிவர்த்தனை தேதி' : 'Transaction Date'}</th>
+                                        <th style={TH_S}>{t('type') || 'Type'}</th>
+                                        <th style={TH_S}>{t('particulars') || 'Details'}</th>
+                                        <th style={{...TH_S, textAlign: 'right'}}>{t('amount')}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {ledger.map((item, idx) => (
+                                        <tr key={idx} style={{ borderBottom: '1px solid #f8fafc', background: '#fef2f2' }}>
+                                            <td style={TD_S}>{item.date.split('-').reverse().join('-')}</td>
+                                            <td style={TD_S}>
+                                                <span style={{ fontSize: '10px', fontWeight: 800, padding: '3px 8px', borderRadius: '6px', background: '#fee2e2', color: '#b91c1c' }}>
+                                                    {item.type}
+                                                </span>
+                                            </td>
+                                            <td style={TD_S}>
+                                                {item.type === 'PURCHASE' ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                        <div style={{ fontWeight: 600, color: '#dc2626' }}>{item.items.map(i => lang==='ta' ? (i.flowerTypeTa || i.flowerType) : i.flowerType).join(', ')}</div>
+                                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>
+                                                                Total: {fmt(item.grandTotal)}
+                                                            </span>
+                                                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>
+                                                                Paid: {fmt(item.paidAmount || 0)}
+                                                            </span>
+                                                            <span style={{ 
+                                                                fontSize: '10px', 
+                                                                fontWeight: 800, 
+                                                                padding: '2px 6px', 
+                                                                borderRadius: '4px', 
+                                                                background: item.status === 'Paid' ? '#dcfce7' : (item.paidAmount > 0 ? '#ffedd5' : '#f1f5f9'), 
+                                                                color: item.status === 'Paid' ? '#15803d' : (item.paidAmount > 0 ? '#ea580c' : '#475569') 
+                                                            }}>
+                                                                {item.status === 'Paid' ? 'Paid' : (item.paidAmount > 0 ? 'Partially Paid' : 'Pending')}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ color: '#16a34a', fontWeight: 600 }}>
+                                                        {item.note || 'Cash Payment'}
+                                                        {item.paymentMode && (
+                                                            <span style={{ marginLeft: '6px', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#16a34a', fontWeight: 800 }}>
+                                                                {item.paymentMode.toUpperCase()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td style={{...TD_S, textAlign: 'right', fontWeight: 800, color: item.type === 'PAYMENT' ? '#16a34a' : '#dc2626'}}>
+                                                {item.type === 'PAYMENT' ? '-' : ''}{fmt(item.grandTotal || item.amount)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const vPurchases = purchases.filter(p => p.vendorId === viewingVendor.id && p.date === viewingLedgerRow.date);
+        
+        // Extract all items from these purchases
+        const modalItems = [];
+        vPurchases.forEach(p => {
+            if (p.items) {
+                p.items.forEach(item => {
+                    modalItems.push(item);
+                });
+            }
+        });
+
+        const totalQty = modalItems.reduce((acc, item) => acc + (parseFloat(item.quantity) || 0), 0);
+        const totalVal = modalItems.reduce((acc, item) => acc + (parseFloat(item.total) || 0), 0);
 
         return (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
@@ -2492,7 +2616,12 @@ const OutsideShop = () => {
                     <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb' }}>
                         <div>
                             <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 900, color: '#92400e' }}>{viewingVendor.name}</h2>
-                            <p style={{ margin: 0, fontSize: '12px', color: '#92400e', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Transaction Ledger</p>
+                            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginTop: '4px' }}>
+                                <span style={{ fontSize: '12px', color: '#92400e', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Transaction Ledger</span>
+                                <span style={{ fontSize: '13px', background: '#f59e0b', color: '#fff', padding: '2px 10px', borderRadius: '20px', fontWeight: 800 }}>
+                                    {lang === 'ta' ? 'கொள்முதல் தேதி' : 'Purchase Date'}: {viewingLedgerRow.date.split('-').reverse().join('/')}
+                                </span>
+                            </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto', marginRight: '20px' }}>
                             {/* Download */}
@@ -2522,78 +2651,111 @@ const OutsideShop = () => {
                                 <WhatsAppIcon size={16} />
                                 {lang === 'ta' ? 'வாட்ஸ்அப்' : 'WhatsApp'}
                             </button>
-                            {/* Edit */}
-                            <button 
-                                onClick={() => { setShowDetailModal(false); handleEditVendor(viewingVendor); }}
-                                title="Edit Vendor"
-                                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fff', border: '1.5px solid #ddd', padding: '8px 14px', borderRadius: '12px', cursor: 'pointer', color: '#4b5563', fontWeight: 700, fontSize: '13px', fontFamily: 'var(--font-sans)' }}
-                            >
-                                <Pencil size={14} />
-                                {lang === 'ta' ? 'திருத்து' : 'Edit'}
-                            </button>
+
                         </div>
-                        <button onClick={() => { setShowDetailModal(false); setViewingVendor(null); }} style={{ background: '#fff', border: '1.5px solid #fed7aa', padding: '8px', borderRadius: '12px', cursor: 'pointer', color: '#92400e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20}/></button>
+                        <button onClick={() => { setShowDetailModal(false); setViewingVendor(null); setViewingLedgerRow(null); }} style={{ background: '#fff', border: '1.5px solid #fed7aa', padding: '8px', borderRadius: '12px', cursor: 'pointer', color: '#92400e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20}/></button>
                     </div>
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 32px' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '2px solid #f1f5f9' }}>
-                                    <th style={TH_S}>{lang === 'ta' ? 'பரிவர்த்தனை தேதி' : 'Transaction Date'}</th>
-                                    <th style={TH_S}>{t('type') || 'Type'}</th>
-                                    <th style={TH_S}>{t('particulars') || 'Details'}</th>
-                                    <th style={{...TH_S, textAlign: 'right'}}>{t('amount')}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {ledger.map((item, idx) => (
-                                    <tr key={idx} style={{ borderBottom: '1px solid #f8fafc', background: '#fef2f2' }}>
-                                        <td style={TD_S}>{item.date.split('-').reverse().join('-')}</td>
-                                        <td style={TD_S}>
-                                            <span style={{ fontSize: '10px', fontWeight: 800, padding: '3px 8px', borderRadius: '6px', background: '#fee2e2', color: '#b91c1c' }}>
-                                                {item.type}
-                                            </span>
-                                        </td>
-                                        <td style={TD_S}>
-                                            {item.type === 'PURCHASE' ? (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                    <div style={{ fontWeight: 600, color: '#dc2626' }}>{item.items.map(i => lang==='ta' ? (i.flowerTypeTa || i.flowerType) : i.flowerType).join(', ')}</div>
-                                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>
-                                                            Total: {fmt(item.grandTotal)}
-                                                        </span>
-                                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>
-                                                            Paid: {fmt(item.paidAmount || 0)}
-                                                        </span>
-                                                        <span style={{ 
-                                                            fontSize: '10px', 
-                                                            fontWeight: 800, 
-                                                            padding: '2px 6px', 
-                                                            borderRadius: '4px', 
-                                                            background: item.status === 'Paid' ? '#dcfce7' : (item.paidAmount > 0 ? '#ffedd5' : '#f1f5f9'), 
-                                                            color: item.status === 'Paid' ? '#15803d' : (item.paidAmount > 0 ? '#ea580c' : '#475569') 
-                                                        }}>
-                                                            {item.status === 'Paid' ? 'Paid' : (item.paidAmount > 0 ? 'Partially Paid' : 'Pending')}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div style={{ color: '#16a34a', fontWeight: 600 }}>
-                                                    {item.note || 'Cash Payment'}
-                                                    {item.paymentMode && (
-                                                        <span style={{ marginLeft: '6px', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#16a34a', fontWeight: 800 }}>
-                                                            {item.paymentMode.toUpperCase()}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td style={{...TD_S, textAlign: 'right', fontWeight: 800, color: item.type === 'PAYMENT' ? '#16a34a' : '#dc2626'}}>
-                                            {item.type === 'PAYMENT' ? '-' : ''}{fmt(item.grandTotal || item.amount)}
-                                        </td>
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        
+                        {/* Items Table */}
+                        <div style={{ overflowX: 'auto', border: '1px solid #cbd5e1', borderRadius: '16px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '2px solid #cbd5e1', background: '#f1f5f9' }}>
+                                        <th style={{ ...TH_S, textAlign: 'left', padding: '12px' }}>{lang === 'ta' ? 'பொருள் பெயர்' : 'Item Name'}</th>
+                                        <th style={{ ...TH_S, textAlign: 'right', padding: '12px' }}>{lang === 'ta' ? 'அளவு' : 'Qty'}</th>
+                                        <th style={{ ...TH_S, textAlign: 'right', padding: '12px' }}>{lang === 'ta' ? 'விகிதம்' : 'Rate'}</th>
+                                        <th style={{ ...TH_S, textAlign: 'right', padding: '12px' }}>{lang === 'ta' ? 'மொத்தம்' : 'Total'}</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {modalItems.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontStyle: 'italic', fontWeight: 600 }}>
+                                                {lang === 'ta' ? 'கொள்முதல் பொருட்கள் ஏதும் இல்லை' : 'No items purchased on this date.'}
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        modalItems.map((item, idx) => (
+                                            <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0', background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                                                <td style={{ ...TD_S, textAlign: 'left', padding: '12px', fontWeight: 700, color: '#1e293b' }}>
+                                                    {lang === 'ta' ? (item.flowerTypeTa || item.flowerType) : item.flowerType}
+                                                </td>
+                                                <td style={{ ...TD_S, textAlign: 'right', padding: '12px', fontWeight: 700, color: '#475569' }}>
+                                                    {item.quantity}
+                                                </td>
+                                                <td style={{ ...TD_S, textAlign: 'right', padding: '12px', fontWeight: 700, color: '#475569' }}>
+                                                    {fmt(item.price)}
+                                                </td>
+                                                <td style={{ ...TD_S, textAlign: 'right', padding: '12px', fontWeight: 800, color: '#1e293b' }}>
+                                                    {fmt(item.total)}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                                {modalItems.length > 0 && (
+                                    <tfoot>
+                                        <tr style={{ background: '#f8fafc', borderTop: '2px solid #cbd5e1' }}>
+                                            <td style={{ ...TD_S, textAlign: 'left', padding: '12px', fontWeight: 900, color: '#1e293b' }}>
+                                                {lang === 'ta' ? 'மொத்தம்' : 'Total'}
+                                            </td>
+                                            <td style={{ ...TD_S, textAlign: 'right', padding: '12px', fontWeight: 900, color: '#1e293b' }}>
+                                                {totalQty.toFixed(2)}
+                                            </td>
+                                            <td style={{ ...TD_S, textAlign: 'right', padding: '12px', fontWeight: 900, color: '#1e293b' }}>
+                                                —
+                                            </td>
+                                            <td style={{ ...TD_S, textAlign: 'right', padding: '12px', fontWeight: 900, color: '#1e293b' }}>
+                                                {fmt(totalVal)}
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                )}
+                            </table>
+                        </div>
+
+                        {/* Balance Summary Section */}
+                        <div style={{ marginTop: '10px' }}>
+                            <h3 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                {lang === 'ta' ? 'இருப்புச் சுருக்கம்' : 'Balance Summary'}
+                            </h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                                <div style={{ borderRight: '1px solid #e2e8f0', paddingRight: '16px' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        {lang === 'ta' ? 'தொடக்க இருப்பு' : 'Opening Balance'}
+                                    </div>
+                                    <div style={{ fontSize: '18px', fontWeight: 800, color: '#475569', marginTop: '6px' }}>
+                                        {fmt(viewingLedgerRow.opening)}
+                                    </div>
+                                </div>
+                                <div style={{ borderRight: '1px solid #e2e8f0', paddingRight: '16px' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        {lang === 'ta' ? 'கொள்முதல் மதிப்பு' : 'Purchase Value'}
+                                    </div>
+                                    <div style={{ fontSize: '18px', fontWeight: 800, color: '#2563eb', marginTop: '6px' }}>
+                                        {fmt(viewingLedgerRow.debit)}
+                                    </div>
+                                </div>
+                                <div style={{ borderRight: '1px solid #e2e8f0', paddingRight: '16px' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        {lang === 'ta' ? 'பெறப்பட்ட தொகை' : 'Payment Received'}
+                                    </div>
+                                    <div style={{ fontSize: '18px', fontWeight: 800, color: '#16a34a', marginTop: '6px' }}>
+                                        {fmt(viewingLedgerRow.credit)}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        {lang === 'ta' ? 'இறுதி இருப்பு' : 'Closing Balance'}
+                                    </div>
+                                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#1e293b', marginTop: '4px' }}>
+                                        {fmt(viewingLedgerRow.closing)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
