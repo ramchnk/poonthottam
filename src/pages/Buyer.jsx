@@ -143,7 +143,7 @@ const Buyer = () => {
     const [viewingBuyer, setViewingBuyer] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [currentBuyer, setCurrentBuyer] = useState({ id: '', name: '', nameTa: '', contact: '', balance: 0, balanceDate: toDateStr(new Date()) });
+    const [currentBuyer, setCurrentBuyer] = useState({ id: '', name: '', nameTa: '', contact: '', place: '', placeTa: '', balance: 0, balanceDate: toDateStr(new Date()) });
     const [isSaving, setIsSaving] = useState(false);
     const [tableSelectedIndex, setTableSelectedIndex] = useState(-1);
     const importRef = useRef(null);
@@ -171,7 +171,7 @@ const Buyer = () => {
     const transTimeout = useRef(null);
 
     // Track if user has manually edited the "other" field
-    const [touched, setTouched] = useState({ name: false, nameTa: false });
+    const [touched, setTouched] = useState({ name: false, nameTa: false, place: false, placeTa: false });
 
     const translate = async (text, from, to) => {
         if (!text || text.length < 2) return '';
@@ -183,15 +183,22 @@ const Buyer = () => {
     };
 
     const handleAutoTranslate = (val, source) => {
-        const target = source === 'name' ? 'nameTa' : 'name';
-        const fromLang = source === 'name' ? 'en' : 'ta';
-        const toLang = source === 'name' ? 'ta' : 'en';
+        let target, fromLang, toLang;
+        if (source === 'name' || source === 'nameTa') {
+            target = source === 'name' ? 'nameTa' : 'name';
+            fromLang = source === 'name' ? 'en' : 'ta';
+            toLang = source === 'name' ? 'ta' : 'en';
+        } else if (source === 'place' || source === 'placeTa') {
+            target = source === 'place' ? 'placeTa' : 'place';
+            fromLang = source === 'place' ? 'en' : 'ta';
+            toLang = source === 'place' ? 'ta' : 'en';
+        }
 
         // Update the field being typed in normally
         setCurrentBuyer(prev => ({ ...prev, [source]: val }));
 
         // If the other field hasn't been manually touched, translate into it
-        if (!touched[target] && val.trim().length > 2) {
+        if (target && !touched[target] && val.trim().length > 2) {
             if (transTimeout.current) clearTimeout(transTimeout.current);
             transTimeout.current = setTimeout(async () => {
                 setIsTranslating(true);
@@ -231,13 +238,15 @@ const Buyer = () => {
     }, [viewingBuyer, sales, payments]);
 
     const handleOpenModal = (buyer = null) => {
-        setTouched({ name: false, nameTa: false });
+        setTouched({ name: false, nameTa: false, place: false, placeTa: false });
         if (!buyer) {
             const nextId = buyers.length > 0 ? Math.max(...buyers.map(b => parseInt(b.displayId) || 0)) + 1 : 101;
-            setCurrentBuyer({ id: '', name: '', nameTa: '', contact: '', balance: 0, balanceDate: toDateStr(new Date()), displayId: nextId });
+            setCurrentBuyer({ id: '', name: '', nameTa: '', contact: '', place: '', placeTa: '', balance: 0, balanceDate: toDateStr(new Date()), displayId: nextId });
         } else {
             setCurrentBuyer({ 
                 ...buyer,
+                place: buyer.place || '',
+                placeTa: buyer.placeTa || '',
                 balanceDate: getBuyerBalanceDate(buyer)
             });
         }
@@ -253,12 +262,13 @@ const Buyer = () => {
                 ...currentBuyer, 
                 balance: parseFloat(currentBuyer.balance) || 0,
                 balanceDate: currentBuyer.balance ? (currentBuyer.balanceDate || toDateStr(new Date())) : '',
-                nameTa: currentBuyer.nameTa || currentBuyer.name
+                nameTa: currentBuyer.nameTa || currentBuyer.name,
+                placeTa: currentBuyer.placeTa || currentBuyer.place
             };
             if (!buyerToSave.id) delete buyerToSave.id;
             await saveBuyer(buyerToSave);
             setIsModalOpen(false);
-            setCurrentBuyer({ id: '', name: '', nameTa: '', contact: '', balance: 0, balanceDate: toDateStr(new Date()) });
+            setCurrentBuyer({ id: '', name: '', nameTa: '', contact: '', place: '', placeTa: '', balance: 0, balanceDate: toDateStr(new Date()) });
         } catch (err) {
             alert('❌ Failed to save: ' + err.message);
         } finally {
@@ -273,7 +283,7 @@ const Buyer = () => {
     };
 
     const handleDownloadTemplate = () => {
-        const csv = [['ID','Name','Contact','Balance'],['101','Sample Customer','9876543210','0'],['102','Another Customer','9123456780','500']]
+        const csv = [['ID','Name','Contact','Place','Balance'],['101','Sample Customer','9876543210','Coimbatore','0'],['102','Another Customer','9123456780','Chennai','500']]
             .map(r => r.join(',')).join('\n');
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -300,7 +310,10 @@ const Buyer = () => {
                     if (rowId > currentMax) currentMax = rowId;
                     await saveBuyer({ 
                         name: row.name || '', 
+                        nameTa: row.nameta || row.name || '',
                         contact: row.contact || '', 
+                        place: row.place || '', 
+                        placeTa: row.placeta || row.place || '', 
                         balance: parseFloat(row.balance) || 0, 
                         balanceDate: row.balance ? toDateStr(new Date()) : '',
                         displayId: rowId 
@@ -317,7 +330,7 @@ const Buyer = () => {
     const filteredBuyers = buyers.filter(b => {
         const s = searchTerm.toLowerCase().trim();
         if (!s) return true;
-        return (b.name || '').toLowerCase().includes(s) || (b.contact || '').includes(s) || String(b.displayId || '').includes(s);
+        return (b.name || '').toLowerCase().includes(s) || (b.nameTa || '').toLowerCase().includes(s) || (b.contact || '').includes(s) || (b.place || '').toLowerCase().includes(s) || (b.placeTa || '').toLowerCase().includes(s) || String(b.displayId || '').includes(s);
     }).sort((a, b) => (parseInt(a.displayId) || 0) - (parseInt(b.displayId) || 0));
 
     useEffect(() => {
@@ -390,6 +403,7 @@ const Buyer = () => {
                             <th style={S.th}>{t('id')}</th>
                             <th style={S.th}>{t('name')}</th>
                             <th style={S.th}>{t('contact')}</th>
+                            <th style={S.th}>{t('place')}</th>
                             <th style={{...S.th, textAlign:'right'}}>{t('amountDue')}</th>
                             <th style={{...S.th, textAlign:'center'}}>{t('ledger')}</th>
                             <th style={{...S.th, textAlign:'center'}}>{t('actions')}</th>
@@ -398,7 +412,7 @@ const Buyer = () => {
                     <tbody>
                         {filteredBuyers.length === 0 ? (
                             <tr>
-                                <td colSpan={6} style={S.emptyRow}>{t('noRecords')}</td>
+                                <td colSpan={7} style={S.emptyRow}>{t('noRecords')}</td>
                             </tr>
                         ) : (
                             filteredBuyers.map((buyer, idx) => {
@@ -440,6 +454,9 @@ const Buyer = () => {
                                             {lang === 'ta' ? (buyer.nameTa || buyer.name) : buyer.name}
                                         </td>
                                         <td style={{...S.td, color: isHighlighted ? 'rgba(255,255,255,0.9)' : '#6b7280'}}>{buyer.contact || '—'}</td>
+                                        <td style={{...S.td, color: isHighlighted ? 'rgba(255,255,255,0.9)' : '#6b7280'}}>
+                                            {lang === 'ta' ? (buyer.placeTa || buyer.place || '—') : (buyer.place || '—')}
+                                        </td>
                                         <td style={{...S.td, textAlign:'right', fontWeight:700, color: isHighlighted ? '#fff' : (buyer.balance > 0 ? '#f43f5e' : '#16a34a')}}>
                                             {fmt(buyer.balance)}
                                         </td>
@@ -499,6 +516,8 @@ const Buyer = () => {
                                     {label:t('id'), key:'displayId', type:'text', disabled:true},
                                     {label:`${t('name')} (English) *`, key:'name', type:'text', required:true, autoFocus:true},
                                     {label:`பெயர் (தமிழ்) *`, key:'nameTa', type:'text', required:true},
+                                    {label:`Place (English)`, key:'place', type:'text'},
+                                    {label:`ஊர் (தமிழ்)`, key:'placeTa', type:'text'},
                                     {label:`WhatsApp Number / வாட்ஸ்அப் *`, key:'contact', type:'tel', required:true, maxLength: 10, pattern: '[0-9]{10}'},
                                     {label:t('initialDues'), key:'balance', type:'number'},
                                     {label:t('oldBalanceDate'), key:'balanceDate', type:'date'},
@@ -518,7 +537,7 @@ const Buyer = () => {
                                                 if (f.key === 'contact') {
                                                     val = val.replace(/\D/g, '').slice(0, 10);
                                                     setCurrentBuyer({...currentBuyer, [f.key]: val});
-                                                } else if (f.key === 'name' || f.key === 'nameTa') {
+                                                } else if (['name', 'nameTa', 'place', 'placeTa'].includes(f.key)) {
                                                     // Mark as touched so auto-translate doesn't overwrite manual edits later
                                                     setTouched(prev => ({ ...prev, [f.key]: true }));
                                                     handleAutoTranslate(val, f.key);

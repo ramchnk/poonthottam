@@ -20,6 +20,8 @@ import BusinessSettings from './pages/BusinessSettings';
 import DailyStatement from './pages/DailyStatement';
 import FlowerWiseReport from './pages/FlowerWiseReport';
 import SalesmanCreditExpenses from './pages/SalesmanCreditExpenses';
+import InvoiceView from './pages/InvoiceView';
+import Payments from './pages/Payments';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useTenant();
@@ -48,6 +50,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={user ? <Navigate to="/app" replace /> : <Login />} />
+      <Route path="/invoice/:tenantId/:buyerId" element={<InvoiceView />} />
       <Route
         path="/app"
         element={
@@ -70,6 +73,7 @@ const AppRoutes = () => {
           <Route path="salesman-ledger" element={<SalesmanLedger />} />
           <Route path="salesman-master" element={<SalesmanMaster />} />
           <Route path="salesman-credit-expenses" element={<SalesmanCreditExpenses />} />
+          <Route path="payments" element={<Payments />} />
           <Route path="reports" element={<Reports />} />
           <Route path="flower-wise-report" element={<FlowerWiseReport />} />
           <Route path="settings" element={<DashboardSettings />} />

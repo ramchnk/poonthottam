@@ -12,6 +12,24 @@ const DEFAULTS = {
     address: '',
     phone1:  '',
     phone2:  '',
+    gst:     '',
+    bankName:'',
+    bankAcc: '',
+    bankIfsc:'',
+    upiId:   '',
+    logoUrl: '',
+    lblInvoiceEn: '',
+    lblInvoiceTa: '',
+    lblInvoiceNoEn: '',
+    lblInvoiceNoTa: '',
+    lblDateEn: '',
+    lblDateTa: '',
+    lblDueDateEn: '',
+    lblDueDateTa: '',
+    lblTermsEn: '',
+    lblTermsTa: '',
+    lblDueTermsEn: '',
+    lblDueTermsTa: '',
 };
 
 const S = {
@@ -118,6 +136,7 @@ const BusinessSettings = ({ isModal, onClose }) => {
                 padding: '16px', marginBottom: '24px', textAlign: 'center', fontSize: '13px'
             }}>
                 <div style={{ fontSize: '10px', fontStyle: 'italic', color: '#94a3b8', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 700 }}>Preview</div>
+                {form.logoUrl && <img src={form.logoUrl} alt="Logo" style={{ maxHeight: '40px', display: 'block', margin: '0 auto 8px' }} />}
                 <div style={{ fontSize: '11px', fontStyle: 'italic', color: '#64748b' }}>{form.motto || 'SRI RAMA JAYAM'}</div>
                 <div style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', margin: '2px 0' }}>{form.name || 'SVM Flowers'}</div>
                 <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b' }}>{form.type || 'Sri Valli Flower Merchant'}</div>
@@ -125,6 +144,16 @@ const BusinessSettings = ({ isModal, onClose }) => {
                 {(form.phone1 || form.phone2) && (
                     <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', fontWeight: 600 }}>
                         {form.phone1 && `Cell: ${form.phone1}`} {form.phone2 && ` | Cell: ${form.phone2}`}
+                    </div>
+                )}
+                {form.gst && (
+                    <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', fontWeight: 600 }}>
+                        GST: {form.gst}
+                    </div>
+                )}
+                {form.upiId && (
+                    <div style={{ fontSize: '11px', color: '#059669', marginTop: '2px', fontWeight: 700 }}>
+                        UPI ID: {form.upiId}
                     </div>
                 )}
             </div>
@@ -140,6 +169,49 @@ const BusinessSettings = ({ isModal, onClose }) => {
                     {field('phone2', lang === 'ta' ? 'தொலைபேசி 2 (வலது)' : 'Phone 2 (right)', 'e.g. 9443247771')}
                 </div>
 
+                {field('gst', lang === 'ta' ? 'GST எண் (விருப்பத்தேர்வு)' : 'GST Number (Optional)', 'e.g. 33AAAAA0000A1Z5')}
+                {field('upiId', lang === 'ta' ? 'UPI ஐடி (பணம் பெற - விருப்பத்தேர்வு)' : 'UPI ID (For Payments - Optional)', 'e.g. shopname@upi')}
+                {field('logoUrl', lang === 'ta' ? 'லோகோ பட URL (விருப்பத்தேர்வு)' : 'Logo Image URL (Optional)', 'e.g. https://example.com/logo.png')}
+
+                <div style={{ margin: '20px 0 10px', borderTop: '1px solid #f1f5f9', paddingTop: '15px' }}>
+                    <span style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left', marginBottom: '10px' }}>
+                        {lang === 'ta' ? 'வங்கி விவரங்கள் (விருப்பத்தேர்வு)' : 'Bank Details (Optional)'}
+                    </span>
+                    {field('bankName', lang === 'ta' ? 'வங்கியின் பெயர்' : 'Bank Name', 'e.g. State Bank of India')}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        {field('bankAcc', lang === 'ta' ? 'கணக்கு எண்' : 'Account Number', 'e.g. 1234567890')}
+                        {field('bankIfsc', lang === 'ta' ? 'IFSC குறியீடு' : 'IFSC Code', 'e.g. SBIN0001234')}
+                    </div>
+                </div>
+
+                <div style={{ margin: '20px 0 10px', borderTop: '1px solid #f1f5f9', paddingTop: '15px' }}>
+                    <span style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left', marginBottom: '10px' }}>
+                        {lang === 'ta' ? 'விலைப்பட்டியல் பெயர் அமைப்புகள் (விருப்பத்தேர்வு)' : 'Invoice Wording Customization (Optional)'}
+                    </span>
+                    {field('lblInvoiceEn', 'Invoice Title (English)', 'e.g. INVOICE')}
+                    {field('lblInvoiceTa', 'Invoice Title (Tamil)', 'e.g. விலைப்பட்டியல்')}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        {field('lblInvoiceNoEn', 'Invoice No. Label (English)', 'e.g. INVOICE NO.')}
+                        {field('lblInvoiceNoTa', 'Invoice No. Label (Tamil)', 'e.g. பட்டியல் எண்')}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        {field('lblDateEn', 'Invoice Date Label (English)', 'e.g. INVOICE DATE')}
+                        {field('lblDateTa', 'Invoice Date Label (Tamil)', 'e.g. தேதி')}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        {field('lblDueDateEn', 'Due Date Label (English)', 'e.g. DUE DATE')}
+                        {field('lblDueDateTa', 'Due Date Label (Tamil)', 'e.g. முடிவு தேதி')}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        {field('lblTermsEn', 'Payment Terms Label (English)', 'e.g. PAYMENT TERMS')}
+                        {field('lblTermsTa', 'Payment Terms Label (Tamil)', 'e.g. செலுத்தும் காலம்')}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        {field('lblDueTermsEn', 'Due Terms Value (English)', 'e.g. Due on Receipt')}
+                        {field('lblDueTermsTa', 'Due Terms Value (Tamil)', 'e.g. உடனடி செலுத்துகை')}
+                    </div>
+                </div>
+
                 <button
                     type="submit"
                     disabled={saving}
@@ -149,7 +221,7 @@ const BusinessSettings = ({ isModal, onClose }) => {
                         fontWeight: 800, fontSize: '14px', border: 'none', cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                         boxShadow: '0 4px 12px rgba(16,185,129,0.2)', transition: 'all 0.2s',
-                        marginTop: '10px'
+                        marginTop: '20px'
                     }}
                 >
                     {saved ? (

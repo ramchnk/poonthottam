@@ -22,7 +22,7 @@ const FlowerWiseReport = () => {
     const { tenantData } = useTenant();
     const [fromDate, setFromDate] = useState(toDateStr(new Date()));
     const [toDate, setToDate] = useState(toDateStr(new Date()));
-    const [selectedFlower, setSelectedFlower] = useState('');
+    const [selectedFlower, setSelectedFlower] = useState('all');
 
     const [products, setProducts] = useState([]);
     const [intakes, setIntakes] = useState([]);
@@ -53,15 +53,11 @@ const FlowerWiseReport = () => {
         };
     }, []);
 
-    // Set first flower as default once products are loaded
-    useEffect(() => {
-        if (products.length > 0 && !selectedFlower) {
-            setSelectedFlower(products[0].name);
-        }
-    }, [products, selectedFlower]);
-
     // Helper to match selected flower across English, Tamil, and Case differences
     const matchesFlower = useMemo(() => {
+        if (selectedFlower === 'all' || selectedFlower === '') {
+            return () => true;
+        }
         const activeProd = products.find(p => p.name === selectedFlower);
         const nameEn = activeProd ? activeProd.name : selectedFlower;
         const nameTa = activeProd ? activeProd.taName : '';
@@ -170,7 +166,7 @@ const FlowerWiseReport = () => {
             doc.setFontSize(14);
             doc.text(lang === 'ta' ? 'பூக்கள் வாரியான அறிக்கை' : 'Flower Wise Report', 105, 44, { align: 'center' });
             doc.setFontSize(11);
-            doc.text(`${lang === 'ta' ? 'பூ பெயர்' : 'Flower Name'}: ${selectedFlower}`, 105, 50, { align: 'center' });
+            doc.text(`${lang === 'ta' ? 'பூ பெயர்' : 'Flower Name'}: ${selectedFlower === 'all' ? (lang === 'ta' ? 'அனைத்தும்' : 'All') : selectedFlower}`, 105, 50, { align: 'center' });
             doc.setFontSize(10);
             doc.text(`${fromDate.split('-').reverse().join('/')} - ${toDate.split('-').reverse().join('/')}`, 105, 55, { align: 'center' });
             
@@ -360,6 +356,9 @@ const FlowerWiseReport = () => {
                         onChange={e => setSelectedFlower(e.target.value)}
                         style={{ padding: '10px 14px', borderRadius: '12px', border: '2px solid #f1f5f9', outline: 'none', fontSize: '13px', fontWeight: 700, color: '#334155', background: '#fff' }}
                     >
+                        <option value="all">
+                            {lang === 'ta' ? 'அனைத்தும்' : 'All'}
+                        </option>
                         {products.map(p => (
                             <option key={p.name} value={p.name}>
                                 {lang === 'ta' ? (p.taName || p.name) : p.name}

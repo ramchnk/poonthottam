@@ -10,6 +10,12 @@ const MENU_ITEMS = [
         route: '/app/buyer',
     },
     {
+        emoji: '💰',
+        labelKey: 'cashReceive',
+        color: { border: '#7c3aed', text: '#7c3aed', bg: '#f5f3ff', glow: 'rgba(124,58,237,0.15)' },
+        route: '/app/payments',
+    },
+    {
         emoji: '🧾',
         labelKey: 'sales',
         color: { border: '#ea580c', text: '#ea580c', bg: '#fff7ed', glow: 'rgba(234,88,12,0.15)' },

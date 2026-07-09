@@ -46,13 +46,13 @@ const Dashboard = () => {
                 {/* Box 1: Sales */}
                 <button
                     onClick={() => navigate('/app/sales-menu')}
-                    className="group relative overflow-hidden bg-white/80 backdrop-blur-md border-4 border-orange-100 hover:border-orange-400 p-10 rounded-[40px] shadow-2xl hover:shadow-orange-100 transition-all transform hover:-translate-y-2 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer min-h-[260px]"
+                    className="group relative overflow-hidden bg-white/80 backdrop-blur-md border-4 border-orange-100 hover:border-orange-400 p-6 rounded-[40px] shadow-2xl hover:shadow-orange-100 transition-all transform hover:-translate-y-2 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer min-h-[260px]"
                 >
-                    <div className="text-center">
-                        <span className="text-5xl font-black text-orange-800 tracking-tighter italic block mb-3 font-display">
+                    <div className="text-center w-full px-2">
+                        <span className="text-3xl font-black text-orange-800 tracking-tight italic block mb-3 font-display break-words">
                             {lang === 'ta' ? 'விற்பனை' : 'Sales'}
                         </span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest font-sans">
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide font-sans block leading-normal break-words">
                             {lang === 'ta' ? 'வாடிக்கையாளர் மற்றும் விற்பனை பதிவு' : 'Customer Registry and Sales'}
                         </span>
                     </div>
@@ -61,13 +61,13 @@ const Dashboard = () => {
                 {/* Box 2: Vendor */}
                 <button
                     onClick={() => navigate('/app/vendor-menu')}
-                    className="group relative overflow-hidden bg-white/80 backdrop-blur-md border-4 border-emerald-100 hover:border-emerald-400 p-10 rounded-[40px] shadow-2xl hover:shadow-emerald-100 transition-all transform hover:-translate-y-2 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer min-h-[260px]"
+                    className="group relative overflow-hidden bg-white/80 backdrop-blur-md border-4 border-emerald-100 hover:border-emerald-400 p-6 rounded-[40px] shadow-2xl hover:shadow-emerald-100 transition-all transform hover:-translate-y-2 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer min-h-[260px]"
                 >
-                    <div className="text-center">
-                        <span className="text-5xl font-black text-emerald-800 tracking-tighter italic block mb-3 font-display">
+                    <div className="text-center w-full px-2">
+                        <span className={`font-black text-emerald-800 tracking-tight italic block mb-3 font-display whitespace-nowrap ${lang === 'ta' ? 'text-2xl' : 'text-3xl'}`}>
                             {lang === 'ta' ? 'விற்பனையாளர்' : 'Vendor'}
                         </span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest font-sans">
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide font-sans block leading-normal break-words">
                             {lang === 'ta' ? 'கொள்முதல் மற்றும் கொடுப்பனவுகள்' : 'Purchases and Payments'}
                         </span>
                     </div>
@@ -76,13 +76,13 @@ const Dashboard = () => {
                 {/* Box 3: Salesman */}
                 <button
                     onClick={() => navigate('/app/salesman-menu')}
-                    className="group relative overflow-hidden bg-white/80 backdrop-blur-md border-4 border-indigo-100 hover:border-indigo-400 p-10 rounded-[40px] shadow-2xl hover:shadow-indigo-100 transition-all transform hover:-translate-y-2 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer min-h-[260px]"
+                    className="group relative overflow-hidden bg-white/80 backdrop-blur-md border-4 border-indigo-100 hover:border-indigo-400 p-6 rounded-[40px] shadow-2xl hover:shadow-indigo-100 transition-all transform hover:-translate-y-2 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer min-h-[260px]"
                 >
-                    <div className="text-center">
-                        <span className="text-5xl font-black text-indigo-800 tracking-tighter italic block mb-3 font-display">
+                    <div className="text-center w-full px-2">
+                        <span className="text-2xl font-black text-indigo-800 tracking-tight italic block mb-3 font-display break-words">
                             {lang === 'ta' ? 'விற்பனையாளர் பிரிவு' : 'Salesman'}
                         </span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest font-sans">
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide font-sans block leading-normal break-words">
                             {lang === 'ta' ? 'பேரேடு மற்றும் வரலாற்று தரவு' : 'Ledger and Historical Data'}
                         </span>
                     </div>
@@ -91,13 +91,13 @@ const Dashboard = () => {
                 {/* Box 4: Flower Wise Report */}
                 <button
                     onClick={() => navigate('/app/flower-wise-report')}
-                    className="group relative overflow-hidden bg-white/80 backdrop-blur-md border-4 border-pink-100 hover:border-pink-400 p-10 rounded-[40px] shadow-2xl hover:shadow-pink-100 transition-all transform hover:-translate-y-2 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer min-h-[260px]"
+                    className="group relative overflow-hidden bg-white/80 backdrop-blur-md border-4 border-pink-100 hover:border-pink-400 p-6 rounded-[40px] shadow-2xl hover:shadow-pink-100 transition-all transform hover:-translate-y-2 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer min-h-[260px]"
                 >
-                    <div className="text-center">
-                        <span className="text-5xl font-black text-pink-800 tracking-tighter italic block mb-3 font-display">
+                    <div className="text-center w-full px-2">
+                        <span className="text-3xl font-black text-pink-800 tracking-tight italic block mb-3 font-display break-words">
                             {lang === 'ta' ? 'பூ அறிக்கை' : 'Flower Report'}
                         </span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest font-sans">
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide font-sans block leading-normal break-words">
                             {lang === 'ta' ? 'பூக்கள் வாரியான பற்று மற்றும் வரவு' : 'Flower Wise Credit & Debit'}
                         </span>
                     </div>

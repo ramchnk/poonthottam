@@ -3,6 +3,7 @@ import { Search, MessageCircle, BarChart2, X, ChevronRight, Download } from 'luc
 import * as XLSX from 'xlsx';
 import { subscribeToCollection, db } from '../../utils/storage';
 import { useTenant } from '../../utils/TenantContext';
+import { getTemplateForTenant, TEMPLATE_TYPES } from '../../utils/invoiceTemplates';
 import { LangContext } from '../../components/Layout';
 import { generateBuyerReceiptCanvas, generateLedgerCanvas } from '../../utils/receiptCanvas';
 import WhatsAppIcon from '../../components/WhatsAppIcon';
@@ -35,7 +36,7 @@ const displayDate = (iso) => {
 
 const PbReports = () => {
   const { t, lang } = useContext(LangContext);
-  const { tenantData } = useTenant();
+  const { tenantData, tenantId } = useTenant();
   const today = toDateStr(new Date());
 
   const [sales, setSales] = useState([]);
@@ -164,6 +165,12 @@ const PbReports = () => {
 
   // Per-row WhatsApp receipt share
   const handleShareRow = async (row) => {
+    const template = getTemplateForTenant(tenantId || 'kasivetrivel');
+    if (template === TEMPLATE_TYPES.FLORAL_PREMIUM) {
+      window.open(`/#/invoice/${tenantId || 'kasivetrivel'}/${row.id}?from=${appliedFrom}&to=${appliedTo}&isPb=true`, '_blank');
+      return;
+    }
+
     setSharingRowId(row.id);
     try {
       const buyerSales = sales.filter(s => {

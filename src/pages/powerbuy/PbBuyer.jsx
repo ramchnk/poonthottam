@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Plus, Edit2, Trash2, Search, X, User, FileText, Upload } from 'lucide-react';
 import { savePbBuyer, deletePbBuyer, subscribeToCollection, db } from '../../utils/storage';
 import { deleteDoc, doc } from 'firebase/firestore';
+import { LangContext } from '../../components/Layout';
 
 // ── Accent palette for Power Buy ──
 const PB = {
@@ -112,13 +113,14 @@ const toDateStr = (d) => {
 };
 
 const PbBuyer = () => {
+  const { lang } = useContext(LangContext);
   const [buyers, setBuyers] = useState([]);
   const [sales, setSales] = useState([]);
   const [payments, setPayments] = useState([]);
   const [viewingBuyer, setViewingBuyer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentBuyer, setCurrentBuyer] = useState({ id: '', name: '', nameTa: '', contact: '', balance: 0, balanceDate: toDateStr(new Date()) });
+  const [currentBuyer, setCurrentBuyer] = useState({ id: '', name: '', nameTa: '', contact: '', place: '', placeTa: '', balance: 0, balanceDate: toDateStr(new Date()) });
   const [isSaving, setIsSaving] = useState(false);
   const [tableSelectedIndex, setTableSelectedIndex] = useState(-1);
   const importRef = useRef(null);
@@ -142,7 +144,7 @@ const PbBuyer = () => {
 
   const [isTranslating, setIsTranslating] = useState(false);
   const transTimeout = useRef(null);
-  const [touched, setTouched] = useState({ name: false, nameTa: false });
+  const [touched, setTouched] = useState({ name: false, nameTa: false, place: false, placeTa: false });
 
   const translate = async (text, from, to) => {
     if (!text || text.length < 2) return '';
@@ -154,11 +156,19 @@ const PbBuyer = () => {
   };
 
   const handleAutoTranslate = (val, source) => {
-    const target = source === 'name' ? 'nameTa' : 'name';
-    const fromLang = source === 'name' ? 'en' : 'ta';
-    const toLang = source === 'name' ? 'ta' : 'en';
+    let target, fromLang, toLang;
+    if (source === 'name' || source === 'nameTa') {
+        target = source === 'name' ? 'nameTa' : 'name';
+        fromLang = source === 'name' ? 'en' : 'ta';
+        toLang = source === 'name' ? 'ta' : 'en';
+    } else if (source === 'place' || source === 'placeTa') {
+        target = source === 'place' ? 'placeTa' : 'place';
+        fromLang = source === 'place' ? 'en' : 'ta';
+        toLang = source === 'place' ? 'ta' : 'en';
+    }
+
     setCurrentBuyer(prev => ({ ...prev, [source]: val }));
-    if (!touched[target] && val.trim().length > 2) {
+    if (target && !touched[target] && val.trim().length > 2) {
       if (transTimeout.current) clearTimeout(transTimeout.current);
       transTimeout.current = setTimeout(async () => {
         setIsTranslating(true);
@@ -199,9 +209,9 @@ const PbBuyer = () => {
     setTouched({ name: false, nameTa: false });
     if (!buyer) {
       const nextId = buyers.length > 0 ? Math.max(...buyers.map(b => parseInt(b.displayId) || 0)) + 1 : 101;
-      setCurrentBuyer({ id: '', name: '', nameTa: '', contact: '', balance: 0, balanceDate: toDateStr(new Date()), displayId: nextId });
+      setCurrentBuyer({ id: '', name: '', nameTa: '', contact: '', place: '', placeTa: '', balance: 0, balanceDate: toDateStr(new Date()), displayId: nextId });
     } else {
-      setCurrentBuyer({ ...buyer, balanceDate: buyer.balanceDate || toDateStr(new Date()) });
+      setCurrentBuyer({ ...buyer, place: buyer.place || '', placeTa: buyer.placeTa || '', balanceDate: buyer.balanceDate || toDateStr(new Date()) });
     }
     setIsModalOpen(true);
   };
@@ -215,12 +225,13 @@ const PbBuyer = () => {
         ...currentBuyer,
         balance: parseFloat(currentBuyer.balance) || 0,
         balanceDate: currentBuyer.balance ? (currentBuyer.balanceDate || toDateStr(new Date())) : '',
-        nameTa: currentBuyer.nameTa || currentBuyer.name
+        nameTa: currentBuyer.nameTa || currentBuyer.name,
+        placeTa: currentBuyer.placeTa || currentBuyer.place
       };
       if (!buyerToSave.id) delete buyerToSave.id;
       await savePbBuyer(buyerToSave);
       setIsModalOpen(false);
-      setCurrentBuyer({ id: '', name: '', nameTa: '', contact: '', balance: 0, balanceDate: toDateStr(new Date()) });
+      setCurrentBuyer({ id: '', name: '', nameTa: '', contact: '', place: '', placeTa: '', balance: 0, balanceDate: toDateStr(new Date()) });
     } catch (err) {
       alert('❌ Failed to save: ' + err.message);
     } finally {
@@ -235,7 +246,7 @@ const PbBuyer = () => {
   };
 
   const handleDownloadTemplate = () => {
-    const csv = [['ID', 'Name', 'Contact', 'Balance'], ['101', 'Sample Customer', '9876543210', '0'], ['102', 'Another Customer', '9123456780', '500']]
+    const csv = [['ID', 'Name', 'Contact', 'Place', 'Balance'], ['101', 'Sample Customer', '9876543210', 'Coimbatore', '0'], ['102', 'Another Customer', '9123456780', 'Chennai', '500']]
       .map(r => r.join(',')).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -260,7 +271,7 @@ const PbBuyer = () => {
         try {
           const rowId = parseInt(row.id) || (currentMax + 1);
           if (rowId > currentMax) currentMax = rowId;
-          await savePbBuyer({ name: row.name || '', contact: row.contact || '', balance: parseFloat(row.balance) || 0, balanceDate: row.balance ? toDateStr(new Date()) : '', displayId: rowId });
+          await savePbBuyer({ name: row.name || '', nameTa: row.nameta || row.name || '', contact: row.contact || '', place: row.place || '', placeTa: row.placeta || row.place || '', balance: parseFloat(row.balance) || 0, balanceDate: row.balance ? toDateStr(new Date()) : '', displayId: rowId });
           imported++;
         } catch { failed++; }
       }
@@ -273,7 +284,7 @@ const PbBuyer = () => {
   const filteredBuyers = buyers.filter(b => {
     const s = searchTerm.toLowerCase().trim();
     if (!s) return true;
-    return (b.name || '').toLowerCase().includes(s) || (b.contact || '').includes(s) || String(b.displayId || '').includes(s);
+    return (b.name || '').toLowerCase().includes(s) || (b.nameTa || '').toLowerCase().includes(s) || (b.contact || '').includes(s) || (b.place || '').toLowerCase().includes(s) || (b.placeTa || '').toLowerCase().includes(s) || String(b.displayId || '').includes(s);
   }).sort((a, b) => (parseInt(a.displayId) || 0) - (parseInt(b.displayId) || 0));
 
   useEffect(() => {
@@ -290,27 +301,27 @@ const PbBuyer = () => {
       <div style={S.header}>
         <div style={S.titleRow}>
           <span style={{ fontSize: '22px' }}>⚡</span>
-          <h2 style={S.title}>⚜️ VV — Customer Master</h2>
+          <h2 style={S.title}>⚜️ {lang === 'ta' ? 'வாடிக்கையாளர் பட்டியல்' : 'VV — Customer Master'}</h2>
         </div>
         <div style={S.actions}>
           <button style={S.btnTemplate} onClick={handleDownloadTemplate}
             onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
             onMouseLeave={e => e.currentTarget.style.background = '#f9fafb'}
           >
-            <FileText size={14} /> Template
+            <FileText size={14} /> {lang === 'ta' ? 'மாதிரி கோப்பு' : 'Template'}
           </button>
           <button style={S.btnImport} onClick={() => importRef.current?.click()}
             onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
             onMouseLeave={e => e.currentTarget.style.background = '#f9fafb'}
           >
-            <Upload size={14} color="#3b82f6" /> Import
+            <Upload size={14} color="#3b82f6" /> {lang === 'ta' ? 'இறக்குமதி' : 'Import'}
             <input type="file" ref={importRef} hidden accept=".csv" onChange={handleImportCSV} />
           </button>
           <button style={S.btnAdd} onClick={() => handleOpenModal()}
             onMouseEnter={e => { e.currentTarget.style.background = PB.primary; e.currentTarget.style.color = '#fff'; }}
             onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = PB.primary; }}
           >
-            <Plus size={14} /> Add Customer
+            <Plus size={14} /> {lang === 'ta' ? 'வாடிக்கையாளர் சேர்க்க' : 'Add Customer'}
           </button>
         </div>
       </div>
@@ -320,7 +331,7 @@ const PbBuyer = () => {
         <Search size={15} style={S.searchIcon} />
         <input
           type="text"
-          placeholder="Search by ID and Name..."
+          placeholder={lang === 'ta' ? 'ஐடி மற்றும் பெயர் மூலம் தேடவும்...' : 'Search by ID and Name...'}
           value={searchTerm}
           onChange={e => { setSearchTerm(e.target.value); setTableSelectedIndex(-1); }}
           style={S.searchInput}
@@ -335,17 +346,18 @@ const PbBuyer = () => {
         <table style={S.table}>
           <thead>
             <tr>
-              <th style={S.th}>ID</th>
-              <th style={S.th}>Name</th>
-              <th style={S.th}>Contact</th>
-              <th style={{ ...S.th, textAlign: 'right' }}>Amount Due (₹)</th>
-              <th style={{ ...S.th, textAlign: 'center' }}>Ledger</th>
-              <th style={{ ...S.th, textAlign: 'center' }}>Actions</th>
+              <th style={S.th}>{lang === 'ta' ? 'ஐடி' : 'ID'}</th>
+              <th style={S.th}>{lang === 'ta' ? 'பெயர்' : 'Name'}</th>
+              <th style={S.th}>{lang === 'ta' ? 'தொடர்பு' : 'Contact'}</th>
+              <th style={S.th}>{lang === 'ta' ? 'ஊர்' : 'Place / ஊர்'}</th>
+              <th style={{ ...S.th, textAlign: 'right' }}>{lang === 'ta' ? 'பாக்கி தொகை (₹)' : 'Amount Due (₹)'}</th>
+              <th style={{ ...S.th, textAlign: 'center' }}>{lang === 'ta' ? 'பேரேடு' : 'Ledger'}</th>
+              <th style={{ ...S.th, textAlign: 'center' }}>{lang === 'ta' ? 'செயல்கள்' : 'Actions'}</th>
             </tr>
           </thead>
           <tbody>
             {filteredBuyers.length === 0 ? (
-              <tr><td colSpan={6} style={S.emptyRow}>No VV customers found.</td></tr>
+              <tr><td colSpan={7} style={S.emptyRow}>{lang === 'ta' ? 'வாடிக்கையாளர்கள் யாரும் காணப்படவில்லை.' : 'No VV customers found.'}</td></tr>
             ) : (
               filteredBuyers.map((buyer, idx) => {
                 const isHighlighted = tableSelectedIndex === idx;
@@ -373,6 +385,9 @@ const PbBuyer = () => {
                     </td>
                     <td style={{ ...S.td, fontWeight: 700, color: isHighlighted ? '#fff' : '#1e293b' }}>{buyer.name}</td>
                     <td style={{ ...S.td, color: isHighlighted ? 'rgba(255,255,255,0.9)' : '#6b7280' }}>{buyer.contact || '—'}</td>
+                    <td style={{ ...S.td, color: isHighlighted ? 'rgba(255,255,255,0.9)' : '#6b7280' }}>
+                      {lang === 'ta' ? (buyer.placeTa || buyer.place || '—') : (buyer.place || '—')}
+                    </td>
                     <td style={{ ...S.td, textAlign: 'right', fontWeight: 700, color: isHighlighted ? '#fff' : (buyer.balance > 0 ? '#f43f5e' : '#16a34a') }}>
                       {fmt(buyer.balance)}
                     </td>
@@ -382,7 +397,7 @@ const PbBuyer = () => {
                         onMouseEnter={e => { if (!isHighlighted) { e.currentTarget.style.borderColor = PB.primary; e.currentTarget.style.color = PB.primary; } }}
                         onMouseLeave={e => { if (!isHighlighted) { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.color = '#6b7280'; } }}
                       >
-                        <FileText size={13} /> View
+                        <FileText size={13} /> {lang === 'ta' ? 'பார்க்க' : 'View'}
                       </button>
                     </td>
                     <td style={{ ...S.td, textAlign: 'center' }}>
@@ -417,7 +432,7 @@ const PbBuyer = () => {
                   <span style={{ fontSize: '20px' }}>⚡</span>
                 </div>
                 <span style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', fontFamily: 'var(--font-display)' }}>
-                  {currentBuyer.id ? 'Edit PB Customer' : 'Add PB Customer'}
+                  {currentBuyer.id ? (lang === 'ta' ? 'வாடிக்கையாளர் விவரம் திருத்து' : 'Edit PB Customer') : (lang === 'ta' ? 'வாடிக்கையாளர் சேர்க்க' : 'Add PB Customer')}
                 </span>
               </div>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex' }}>
@@ -427,12 +442,14 @@ const PbBuyer = () => {
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
               <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', flex: 1 }}>
                 {[
-                  { label: 'ID', key: 'displayId', type: 'text', disabled: true },
-                  { label: 'Name (English) *', key: 'name', type: 'text', required: true, autoFocus: true },
-                  { label: 'பெயர் (தமிழ்)', key: 'nameTa', type: 'text' },
-                  { label: 'WhatsApp Number *', key: 'contact', type: 'tel', required: true, maxLength: 10, pattern: '[0-9]{10}' },
-                  { label: 'Opening Balance', key: 'balance', type: 'number' },
-                  { label: 'Balance Date', key: 'balanceDate', type: 'date' },
+                  { label: lang === 'ta' ? 'ஐடி' : 'ID', key: 'displayId', type: 'text', disabled: true },
+                  { label: lang === 'ta' ? 'பெயர் (ஆங்கிலம்) *' : 'Name (English) *', key: 'name', type: 'text', required: true, autoFocus: true },
+                  { label: lang === 'ta' ? 'பெயர் (தமிழ்)' : 'Name (Tamil)', key: 'nameTa', type: 'text' },
+                  { label: lang === 'ta' ? 'Place (English)' : 'Place (English)', key: 'place', type: 'text' },
+                  { label: lang === 'ta' ? 'ஊர் (தமிழ்)' : 'Place (Tamil)', key: 'placeTa', type: 'text' },
+                  { label: lang === 'ta' ? 'வாட்ஸ்அப் எண் *' : 'WhatsApp Number *', key: 'contact', type: 'tel', required: true, maxLength: 10, pattern: '[0-9]{10}' },
+                  { label: lang === 'ta' ? 'ஆரம்ப பாக்கி' : 'Opening Balance', key: 'balance', type: 'number' },
+                  { label: lang === 'ta' ? 'பாக்கி தேதி' : 'Balance Date', key: 'balanceDate', type: 'date' },
                 ].map(f => (
                   <div key={f.key}>
                     <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>{f.label}</label>
@@ -449,7 +466,7 @@ const PbBuyer = () => {
                         if (f.key === 'contact') {
                           val = val.replace(/\D/g, '').slice(0, 10);
                           setCurrentBuyer({ ...currentBuyer, [f.key]: val });
-                        } else if (f.key === 'name' || f.key === 'nameTa') {
+                        } else if (['name', 'nameTa', 'place', 'placeTa'].includes(f.key)) {
                           setTouched(prev => ({ ...prev, [f.key]: true }));
                           handleAutoTranslate(val, f.key);
                         } else {
@@ -472,11 +489,11 @@ const PbBuyer = () => {
               <div style={{ padding: '16px 24px', borderTop: '1px solid #f1f5f9', background: '#fafafa', display: 'flex', justifyContent: 'flex-end', gap: '10px', flexShrink: 0 }}>
                 <button type="button" onClick={() => setIsModalOpen(false)}
                   style={{ padding: '9px 20px', borderRadius: '9px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#64748b', fontWeight: 600, fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--font-sans)' }}>
-                  Cancel
+                  {lang === 'ta' ? 'ரத்துசெய்' : 'Cancel'}
                 </button>
                 <button type="submit" disabled={isSaving}
                   style={{ padding: '9px 22px', borderRadius: '9px', border: `1.5px solid ${PB.primary}`, background: '#fff', color: PB.primary, fontWeight: 700, fontSize: '13px', cursor: isSaving ? 'not-allowed' : 'pointer', opacity: isSaving ? 0.6 : 1, fontFamily: 'var(--font-sans)' }}>
-                  {isSaving ? 'Saving...' : (currentBuyer.id ? 'Update' : 'Register')}
+                  {isSaving ? (lang === 'ta' ? 'சேமிக்கப்படுகிறது...' : 'Saving...') : (currentBuyer.id ? (lang === 'ta' ? 'மாற்று' : 'Update') : (lang === 'ta' ? 'பதிவு செய்' : 'Register'))}
                 </button>
               </div>
             </form>
@@ -490,9 +507,9 @@ const PbBuyer = () => {
           <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '560px', boxShadow: '0 20px 60px rgba(0,0,0,0.15)', overflow: 'hidden', fontFamily: 'var(--font-sans)' }}>
             <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', fontFamily: 'var(--font-display)' }}>{viewingBuyer.name}</div>
+                <div style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', fontFamily: 'var(--font-display)' }}>{lang === 'ta' ? (viewingBuyer.nameTa || viewingBuyer.name) : viewingBuyer.name}</div>
                 <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  ⚜️ VV • Last 30 Days • #{viewingBuyer.displayId}
+                  ⚜️ VV • {lang === 'ta' ? 'கடந்த 30 நாட்கள்' : 'Last 30 Days'} • #{viewingBuyer.displayId}
                 </div>
               </div>
               <button onClick={() => setViewingBuyer(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex' }}>
@@ -500,9 +517,9 @@ const PbBuyer = () => {
               </button>
             </div>
             <div style={{ padding: '16px 24px', maxHeight: '55vh', overflowY: 'auto' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>Transaction History</div>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>{lang === 'ta' ? 'பரிவர்த்தனை வரலாறு' : 'Transaction History'}</div>
               {buyerTransactions.length === 0 ? (
-                <div style={{ padding: '48px 16px', textAlign: 'center', color: '#9ca3af', fontStyle: 'italic' }}>No transactions in the last 30 days.</div>
+                <div style={{ padding: '48px 16px', textAlign: 'center', color: '#9ca3af', fontStyle: 'italic' }}>{lang === 'ta' ? 'கடந்த 30 நாட்களில் பரிவர்த்தனைகள் எதுவும் இல்லை.' : 'No transactions in the last 30 days.'}</div>
               ) : (
                 <div style={{ border: '1px solid #f1f5f9', borderRadius: '10px', overflow: 'hidden' }}>
                   {buyerTransactions.map((tx, i) => (
@@ -512,7 +529,7 @@ const PbBuyer = () => {
                           {tx.date.split('-').slice(1).reverse().join('/')}
                         </div>
                         <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: tx.type === 'SALE' ? '#3b82f6' : (tx.type === 'OLD BALANCE' ? '#64748b' : PB.primary) }}>
-                          {tx.type === 'SALE' ? 'SALE' : (tx.type === 'PAID' ? 'PAID' : 'OLD BALANCE')}
+                          {tx.type === 'SALE' ? (lang === 'ta' ? 'விற்பனை' : 'SALE') : (tx.type === 'PAID' ? (lang === 'ta' ? 'பணம் செலுத்தியது' : 'PAID') : (lang === 'ta' ? 'ஆரம்ப பாக்கி' : 'OLD BALANCE'))}
                         </span>
                       </div>
                       <span style={{ fontWeight: 700, fontSize: '14px', color: tx.type === 'SALE' ? '#1e293b' : (tx.type === 'OLD BALANCE' ? '#e11d48' : PB.primary) }}>
@@ -526,7 +543,7 @@ const PbBuyer = () => {
             <div style={{ padding: '14px 24px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={() => setViewingBuyer(null)}
                 style={{ padding: '8px 20px', borderRadius: '9px', background: PB.primary, color: '#fff', border: 'none', fontWeight: 700, fontSize: '12px', cursor: 'pointer', letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'var(--font-sans)' }}>
-                Close
+                {lang === 'ta' ? 'மூடு' : 'Close'}
               </button>
             </div>
           </div>

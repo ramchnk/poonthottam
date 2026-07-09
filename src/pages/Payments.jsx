@@ -80,48 +80,21 @@ const Payments = () => {
         }
     }, [isModalOpen]);
 
-    const getQueryRange = () => {
-        const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
-        let start = null;
-        let end = null;
-
-        if (dateRange === 'today') {
-            start = todayStr;
-            end = todayStr;
-        } else if (dateRange === 'yesterday') {
-            const yesterday = new Date(now);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
-            start = yesterdayStr;
-            end = yesterdayStr;
-        } else if (dateRange === 'thisMonth') {
-            start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-        } else if (dateRange === 'thisYear') {
-            start = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
-        } else if (dateRange === 'prevYear') {
-            start = new Date(now.getFullYear() - 1, 0, 1).toISOString().split('T')[0];
-            end = new Date(now.getFullYear() - 1, 11, 31).toISOString().split('T')[0];
-        } else if (dateRange === 'custom') {
-            start = customRange.start || null;
-            end = customRange.end || null;
-        }
-        return { start, end };
-    };
-
-    const { start: queryStart, end: queryEnd } = getQueryRange();
-
     useEffect(() => {
         const u1 = subscribeToCollection('payments', (data) =>
             setPayments(data.sort((a, b) => {
-                const dA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
-                const dB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
-                return dA - dB;
-            })), true, queryStart, queryEnd);
+                const getTime = (p) => {
+                    if (p.timestamp) return p.timestamp.toDate ? p.timestamp.toDate().getTime() : new Date(p.timestamp).getTime();
+                    if (p.createdAt) return p.createdAt.toDate ? p.createdAt.toDate().getTime() : new Date(p.createdAt).getTime();
+                    if (p.date) return new Date(p.date).getTime();
+                    return 0;
+                };
+                return getTime(a) - getTime(b);
+            })), true);
         const u2 = subscribeToCollection('buyers', setBuyers);
         const u3 = subscribeToCollection('farmers', setFarmers);
         return () => { u1(); u2(); u3(); };
-    }, [queryStart, queryEnd]);
+    }, []);
 
     const handleOpenModal = () => {
         setFormData({ 

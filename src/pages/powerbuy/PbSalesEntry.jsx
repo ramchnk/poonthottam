@@ -3,6 +3,7 @@ import { Plus, Trash2, Printer, MessageCircle, Clock, Pencil, History } from 'lu
 import { savePbSale, getNextPbInvoiceNo, subscribeToCollection, db } from '../../utils/storage';
 import { doc, updateDoc, increment, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { useTenant } from '../../utils/TenantContext';
+import { getTemplateForTenant, TEMPLATE_TYPES } from '../../utils/invoiceTemplates';
 import { LangContext } from '../../components/Layout';
 import { generateBuyerReceiptCanvas } from '../../utils/receiptCanvas';
 import WhatsAppIcon from '../../components/WhatsAppIcon';
@@ -98,7 +99,7 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
 
 const PbSalesEntry = () => {
   const { t, lang } = useContext(LangContext);
-  const { tenantData } = useTenant();
+  const { tenantData, tenantId } = useTenant();
   const [flowers, setFlowers] = useState([]);
   const [buyers, setBuyers] = useState([]);
   const [allSales, setAllSales] = useState([]);
@@ -220,6 +221,13 @@ const PbSalesEntry = () => {
   const handleShareWhatsApp = async () => {
     const activeBuyerEntries = dailyEntries.filter(s => s.buyerId === buyerId);
     if (!buyerId || activeBuyerEntries.length === 0) return alert('No items to share for today.');
+    
+    const template = getTemplateForTenant(tenantId || 'kasivetrivel');
+    if (template === TEMPLATE_TYPES.FLORAL_PREMIUM) {
+      window.open(`/#/invoice/${tenantId || 'kasivetrivel'}/${buyerId}?from=${date}&to=${date}&isPb=true`, '_blank');
+      return;
+    }
+
     const buyer = buyers.find(b => b.id === buyerId);
     const { oldBalance, cashRec, cashLess, todayTotal } = financialStats;
 

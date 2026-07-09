@@ -7,6 +7,7 @@ import { LangContext } from '../components/Layout';
 import { generateBuyerReceiptCanvas, generateLedgerCanvas } from '../utils/receiptCanvas';
 import WhatsAppIcon from '../components/WhatsAppIcon';
 import { useTenant } from '../utils/TenantContext';
+import { getTemplateForTenant, TEMPLATE_TYPES } from '../utils/invoiceTemplates';
 import { jsPDF } from 'jspdf';
 
 const fmt = (n) =>
@@ -28,7 +29,7 @@ const displayDate = (iso) => {
 
 const Reports = () => {
     const { t, lang } = useContext(LangContext);
-    const { tenantData } = useTenant();
+    const { tenantData, tenantId } = useTenant();
     const today = toDateStr(new Date());
 
     const [sales, setSales]       = useState([]);
@@ -593,6 +594,12 @@ const Reports = () => {
     };
 
     const handleShareRow = async (row) => {
+        const template = getTemplateForTenant(tenantId || 'kasivetrivel');
+        if (template === TEMPLATE_TYPES.FLORAL_PREMIUM) {
+            window.open(`/#/invoice/${tenantId || 'kasivetrivel'}/${row.id}?from=${appliedFrom}&to=${appliedTo}`, '_blank');
+            return;
+        }
+
         setSharingRowId(row.id);
         try {
             // Gather flat sales items for this buyer in applied period
@@ -1019,14 +1026,7 @@ const Reports = () => {
                                         style={{ padding: '5px 12px', borderRadius: '7px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: '11px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                         {showFullLedger ? `✖️ ${t('closeView')}` : `👁️ ${t('viewLedger')}`}
                                     </button>
-                                    <button onClick={() => handleShareLedger(detailBuyer)}
-                                        disabled={sharingRowId === detailBuyer.id}
-                                        style={{ padding: '5px 12px', borderRadius: '7px', background: '#22c55e', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                        {sharingRowId === detailBuyer.id
-                                            ? <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                                            : <><MessageCircle size={14} /> WhatsApp</>
-                                        }
-                                    </button>
+
                                     <button onClick={() => handleDownloadLedgerPDF(detailBuyer)}
                                         disabled={downloadingRowId === detailBuyer.id}
                                         style={{ padding: '5px 12px', borderRadius: '7px', background: '#3b82f6', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>

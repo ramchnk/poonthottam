@@ -6,6 +6,7 @@ import { LangContext } from '../components/Layout';
 import { generateBuyerReceiptCanvas } from '../utils/receiptCanvas';
 import WhatsAppIcon from '../components/WhatsAppIcon';
 import { useTenant } from '../utils/TenantContext';
+import { getTemplateForTenant, TEMPLATE_TYPES } from '../utils/invoiceTemplates';
 
 /* ── Keyboard-navigable Searchable Customer Dropdown ── */
 const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder, lang }) => {
@@ -115,7 +116,7 @@ const LABEL_S = {
 
 const SalesEntry = () => {
     const { t, lang } = useContext(LangContext);
-    const { tenantData } = useTenant();
+    const { tenantData, tenantId } = useTenant();
     const [flowers, setFlowers]   = useState([]);
     const [buyers, setBuyers]     = useState([]);
     const [allSales, setAllSales] = useState([]);
@@ -301,6 +302,13 @@ const SalesEntry = () => {
     const handleShareWhatsApp = async () => {
         const activeBuyerEntries = dailyEntries.filter(s => s.buyerId === buyerId);
         if (!buyerId || activeBuyerEntries.length === 0) return alert('No items to share for today.');
+        
+        const template = getTemplateForTenant(tenantId || 'kasivetrivel');
+        if (template === TEMPLATE_TYPES.FLORAL_PREMIUM) {
+            window.open(`/#/invoice/${tenantId || 'kasivetrivel'}/${buyerId}?from=${date}&to=${date}`, '_blank');
+            return;
+        }
+
         const buyer = buyers.find(b => b.id === buyerId);
         const { oldBalance, cashRec, cashLess, todayTotal } = financialStats;
 
