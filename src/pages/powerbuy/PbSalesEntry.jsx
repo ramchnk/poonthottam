@@ -42,8 +42,13 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
   const [cursor, setCursor] = useState(0);
   const listRef = useRef(null);
 
+  const formatName = (item) => {
+    if (!item) return '';
+    return item.taName ? `${item.name}-${item.taName}` : item.name;
+  };
+
   const selectedItem = items.find(i => i.id === value || i.name === value);
-  const selectedName = selectedItem ? (lang === 'ta' ? (selectedItem.taName || selectedItem.name) : selectedItem.name) : '';
+  const selectedName = selectedItem ? formatName(selectedItem) : '';
 
   const filtered = query.trim() ? items.filter(i => {
     const n = i.name?.toLowerCase() || '';
@@ -54,7 +59,7 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
 
   const choose = (item) => {
     onChange(item);
-    setQuery(lang === 'ta' ? (item.taName || item.name) : item.name);
+    setQuery(formatName(item));
     setOpen(false);
   };
 
@@ -88,7 +93,7 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
               style={{ padding: '8px 12px', borderRadius: '7px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', background: i === cursor ? PB.light : 'transparent', color: i === cursor ? PB.primary : '#374151' }}
               onMouseEnter={() => setCursor(i)}>
               {item.displayId && <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8' }}>#{item.displayId}</span>}
-              {lang === 'ta' ? (item.taName || item.name) : item.name}
+              {formatName(item)}
             </li>
           ))}
         </ul>

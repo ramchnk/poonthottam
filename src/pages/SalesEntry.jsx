@@ -15,8 +15,13 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
     const [cursor, setCursor]       = useState(0);
     const listRef                   = useRef(null);
 
+    const formatName = (item) => {
+        if (!item) return '';
+        return item.taName ? `${item.name}-${item.taName}` : item.name;
+    };
+
     const selectedItem = items.find(i => i.id === value || i.name === value);
-    const selectedName = selectedItem ? (lang === 'ta' ? (selectedItem.taName || selectedItem.name) : selectedItem.name) : '';
+    const selectedName = selectedItem ? formatName(selectedItem) : '';
 
     const filtered = query.trim()
         ? items.filter(i => {
@@ -29,7 +34,7 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
 
     const choose = (item) => {
         onChange(item);
-        setQuery(lang === 'ta' ? (item.taName || item.name) : item.name);
+        setQuery(formatName(item));
         setOpen(false);
     };
 
@@ -91,7 +96,7 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
                             onMouseEnter={() => setCursor(i)}
                         >
                             {item.displayId && <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8' }}>#{item.displayId}</span>}
-                            {lang === 'ta' ? (item.taName || item.name) : item.name}
+                            {formatName(item)}
                         </li>
                     ))}
                 </ul>
@@ -291,7 +296,7 @@ const SalesEntry = () => {
         }
     };
 
-    const fmt = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
+    const fmt = (n) => `${Number(n).toLocaleString('en-IN')}`;
     const formatTime = (ts) => {
         if (!ts) return '--:--';
         const d = ts.toDate ? ts.toDate() : new Date(ts);
@@ -757,7 +762,7 @@ const SalesEntry = () => {
                 {/* 6. Grand Total Box */}
                 <div style={{ border: '3px solid #000', padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <span style={{ fontSize: '24px', fontWeight: '900', textTransform: 'uppercase' }}>{t('balance')}</span>
-                    <span style={{ fontSize: '30px', fontWeight: '900' }}>₹{Number(financialStats.finalBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    <span style={{ fontSize: '30px', fontWeight: '900' }}>{Number(financialStats.finalBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 </div>
 
                 {/* 7. Footer */}

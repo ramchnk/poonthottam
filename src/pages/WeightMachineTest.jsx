@@ -328,7 +328,6 @@ const WeightMachineTest = () => {
                     <Package size={12} /> Rate / விலை
                   </label>
                   <div className="bg-white rounded-[20px] p-5 shadow-md flex items-center focus-within:ring-4 focus-within:ring-amber-400/20 transition-all">
-                    <span className="text-2xl font-black text-amber-500 mr-2">₹</span>
                     <input
                       type="number"
                       value={rate}
@@ -439,8 +438,8 @@ const WeightMachineTest = () => {
                     <td className="px-6 py-4 font-bold text-gray-700">{p.vendorName}</td>
                     <td className="px-6 py-4 font-black italic text-gray-600">🌾 {p.flowerName}</td>
                     <td className="px-6 py-4 text-center font-black text-amber-600">{p.weight.toFixed(3)} KG</td>
-                    <td className="px-6 py-4 text-right font-medium text-gray-400">₹{p.rate}</td>
-                    <td className="px-6 py-4 text-right font-black text-orange-700 text-lg">₹{p.total.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right font-medium text-gray-400">{p.rate}</td>
+                    <td className="px-6 py-4 text-right font-black text-orange-700 text-lg">{p.total.toFixed(2)}</td>
                     <td className="px-6 py-4 text-center flex items-center justify-center gap-2">
                       <button onClick={() => handlePrintReceipt(p)} className="p-2 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-xl transition-all" title="Print Receipt">
                         <Printer size={18} />
@@ -485,7 +484,7 @@ const WeightMachineTest = () => {
           
           <div className="relative z-10 flex justify-between items-center pt-6 border-t border-white/10 text-xs text-amber-100 font-bold">
             <span>METHOD: {wm.method.toUpperCase()}</span>
-            <span>TOTAL DUE: ₹{calculatedTotal}</span>
+            <span>TOTAL DUE: {calculatedTotal}</span>
           </div>
 
           <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-orange-500/25 rounded-full blur-3xl pointer-events-none"></div>

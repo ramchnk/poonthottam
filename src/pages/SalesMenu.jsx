@@ -28,9 +28,16 @@ const MENU_ITEMS = [
         color: { border: '#d97706', text: '#d97706', bg: '#fffbeb', glow: 'rgba(217,119,6,0.15)' },
         route: '/app/reports',
     },
+    {
+        emoji: '🌸',
+        label: 'Daily Price List',
+        labelTa: 'தினசரி விலை பட்டியல்',
+        color: { border: '#10b981', text: '#10b981', bg: '#ecfdf5', glow: 'rgba(16,185,129,0.15)' },
+        route: '/app/daily-flower-prices',
+    },
 ];
 
-const CARD_W = 280; // slightly wider to fit "Customer Report" on one line if possible
+const CARD_W = 320; // wide enough to fit long Tamil and English names fully inside the box
 
 const MenuCard = ({ emoji, label, color, onClick, delay }) => {
     const [hovered, setHovered] = React.useState(false);

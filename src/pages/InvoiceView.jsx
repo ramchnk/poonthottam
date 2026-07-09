@@ -193,10 +193,11 @@ const InvoiceView = () => {
 
 
 
-    // Dynamic payment QR code based on UPI ID and invoice dues
+    // Dynamic payment QR code based on UPI ID and invoice dues (modified to be static and allow manual input)
     const getPaymentQrUrl = () => {
-        if (!tenantInfo?.upiId) return null;
-        const upiPayUrl = `upi://pay?pa=${tenantInfo.upiId}&pn=${encodeURIComponent(tenantInfo.name)}&am=${financials.balanceDues.toFixed(2)}&cu=INR`;
+        const upiId = tenantInfo?.upiId || 'mmafreshflowers@upi';
+        const name = tenantInfo?.name || 'MMA Fresh Flowers';
+        const upiPayUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&cu=INR`;
         return `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(upiPayUrl)}`;
     };
 
@@ -442,7 +443,7 @@ const InvoiceView = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '15px', marginTop: '35px', borderBottom: '2px solid #F4E8C1', paddingBottom: '24px', boxSizing: 'border-box' }}>
                     
                     {/* Left Column: Contact details & Medallion */}
-                    <div style={{ width: '220px', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', marginTop: '12px', paddingLeft: '15px', boxSizing: 'border-box' }}>
+                    <div style={{ width: '185px', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', marginTop: '12px', paddingLeft: '15px', boxSizing: 'border-box' }}>
                         {/* Phone row */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0 }}>
@@ -476,13 +477,13 @@ const InvoiceView = () => {
                         </div>
                     </div>
 
-                    {/* Center Column: Logo & Tamil Banners */}
+                    {/* Center Column: Logo & Tamil Banners (Centered relative to invoice width) */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'center' }}>
                         {tenantId === 'mma' ? (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ fontFamily: 'Amiri, Georgia, serif', color: '#7C1A3A', fontSize: '54px', fontWeight: 900, letterSpacing: '0.03em', lineHeight: '1' }}>MMA</span>
-                                    <svg width="54" height="54" viewBox="0 0 64 64" style={{ marginLeft: '4px', flexShrink: 0, transform: 'translateY(6px)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ fontFamily: 'Amiri, Georgia, serif', color: '#7C1A3A', fontSize: '72px', fontWeight: 900, letterSpacing: '0.03em', lineHeight: '1' }}>MMA</span>
+                                    <svg width="72" height="72" viewBox="0 0 64 64" style={{ marginLeft: '4px', flexShrink: 0, transform: 'translateY(10px)' }}>
                                         {/* Stem */}
                                         <path d="M32,32 Q45,35 48,55" fill="none" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" />
                                         {/* Leaf 1 */}
@@ -500,13 +501,10 @@ const InvoiceView = () => {
                                         <circle cx="32" cy="26" r="2" fill="#fff" />
                                     </svg>
                                 </div>
-                                <span style={{ fontFamily: 'Aref Ruqaa, Georgia, serif', fontSize: '28px', color: '#1E4620', fontWeight: 800, marginTop: '-14px', letterSpacing: '0.05em' }}>fresh flowers</span>
-                                <span style={{ fontFamily: 'Montserrat, sans-serif', fontSize: '11px', color: '#7C1A3A', fontWeight: 800, marginTop: '12px', display: 'block', letterSpacing: '0.04em', lineHeight: '1.4' }}>
-                                    ♥ – Freshness You Can Trust, Quality You Deserve – ♥
-                                </span>
+                                <span style={{ fontFamily: 'Aref Ruqaa, Georgia, serif', fontSize: '38px', color: '#1E4620', fontWeight: 800, marginTop: '-18px', letterSpacing: '0.05em' }}>fresh flowers</span>
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', paddingBottom: '60px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 {tenantInfo?.logoUrl ? (
                                     <img src={tenantInfo.logoUrl} alt="Logo" style={{ maxHeight: '60px', maxWidth: '140px', marginBottom: '6px' }} />
                                 ) : (
@@ -519,17 +517,13 @@ const InvoiceView = () => {
                                     {tenantInfo?.motto || 'Freshness You Can Trust, Quality You Deserve'}
                                 </span>
                                 <div style={{
-                                    position: 'absolute',
-                                    bottom: '0px',
-                                    left: '76%',
-                                    transform: 'translateX(-50%)',
+                                    marginTop: '12px',
                                     fontFamily: 'Playfair Display, Georgia, serif',
                                     fontSize: '14px',
                                     color: '#7C1A3A',
                                     fontStyle: 'italic',
                                     fontWeight: 800,
-                                    whiteSpace: 'nowrap',
-                                    width: 'max-content'
+                                    whiteSpace: 'nowrap'
                                 }}>
                                     ♥ Every Flower Tells A Story, Let Us Be A Part Of Yours ♥
                                 </div>
@@ -537,7 +531,7 @@ const InvoiceView = () => {
                         )}
 
                         {tenantId === 'mma' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '16px', alignItems: 'center', position: 'relative', paddingBottom: '60px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '16px', alignItems: 'center' }}>
                                 <div style={{
                                     border: '1.2px solid #D4AF37',
                                     borderRadius: '20px',
@@ -569,17 +563,13 @@ const InvoiceView = () => {
                                     குறைந்த விலையில் கிடைக்கும்
                                 </div>
                                 <div style={{
-                                    position: 'absolute',
-                                    bottom: '0px',
-                                    left: '76%',
-                                    transform: 'translateX(-50%)',
+                                    marginTop: '12px',
                                     fontFamily: 'Playfair Display, Georgia, serif',
                                     fontSize: '14px',
                                     color: '#7C1A3A',
                                     fontStyle: 'italic',
                                     fontWeight: 800,
-                                    whiteSpace: 'nowrap',
-                                    width: 'max-content'
+                                    whiteSpace: 'nowrap'
                                 }}>
                                     ♥ Every Flower Tells A Story, Let Us Be A Part Of Yours ♥
                                 </div>
@@ -587,81 +577,14 @@ const InvoiceView = () => {
                         )}
                     </div>
 
-                    {/* Right Column: Invoice Meta & Garland/Quote */}
-                    <div style={{ width: '280px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-start', boxSizing: 'border-box' }}>
-                        {/* Invoice Meta card */}
+                    {/* Right Column: Premium Round Badge (Symmetric to Left Column) */}
+                    <div style={{ width: '185px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingRight: '15px', boxSizing: 'border-box' }}>
+                        {/* Premium Round Badge */}
                         <div style={{
-                            border: '1.2px solid #D4AF37',
-                            padding: '14px 16px',
-                            background: '#FCF9F2',
-                            borderRadius: '12px',
-                            width: '100%',
-                            boxSizing: 'border-box'
-                        }}>
-                            <h2 style={{ fontFamily: 'Cinzel, Georgia, serif', color: '#7C1A3A', margin: '0 0 4px', fontSize: '22px', fontWeight: 900, textAlign: 'center', letterSpacing: '0.05em' }}>
-                                {activeText.invoice}
-                            </h2>
-                            {/* Decorative line divider with floral symbol */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 0 10px' }}>
-                                <div style={{ flex: 1, height: '1px', background: '#D4AF37' }} />
-                                <div style={{ margin: '0 6px', fontSize: '8px', color: '#D4AF37', lineHeight: 1 }}>✿</div>
-                                <div style={{ flex: 1, height: '1px', background: '#D4AF37' }} />
-                            </div>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-                                {/* Row 1: Invoice No */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #EFE5C9', boxSizing: 'border-box' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <FileText size={12} style={{ color: '#7C1A3A' }} />
-                                        <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#7C1A3A', textTransform: 'uppercase', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>{activeText.invoiceNo}</span>
-                                    </div>
-                                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#2C1E21', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                        INV-{from.replace(/-/g, '')}-{buyer?.displayId}
-                                    </span>
-                                </div>
-
-                                {/* Row 2: Date */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #EFE5C9', boxSizing: 'border-box' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <Calendar size={12} style={{ color: '#7C1A3A' }} />
-                                        <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#7C1A3A', textTransform: 'uppercase', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>{activeText.date}</span>
-                                    </div>
-                                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#2C1E21', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                        {displayDate(from)}
-                                    </span>
-                                </div>
-
-                                {/* Row 3: Due Date */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #EFE5C9', boxSizing: 'border-box' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <Clock size={12} style={{ color: '#7C1A3A' }} />
-                                        <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#7C1A3A', textTransform: 'uppercase', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>{activeText.dueDate}</span>
-                                    </div>
-                                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#2C1E21', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                        {displayDate(to)}
-                                    </span>
-                                </div>
-
-                                {/* Row 4: Terms */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', boxSizing: 'border-box' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <CreditCard size={12} style={{ color: '#7C1A3A' }} />
-                                        <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#7C1A3A', textTransform: 'uppercase', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>{activeText.terms}</span>
-                                    </div>
-                                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#2C1E21', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                        {activeText.dueTerms}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {/* Premium Round Badge aligned with quote */}
-                        <div style={{
-                            marginTop: '32px',
-                            marginRight: '15px',
+                            marginTop: '12px',
                             display: 'flex',
-                            justifyContent: 'flex-end',
-                            width: '100%',
+                            justifyContent: 'center',
+                            width: '185px',
                             boxSizing: 'border-box'
                         }}>
                             <div style={{
@@ -712,6 +635,10 @@ const InvoiceView = () => {
                                 </svg>
                             </div>
                         </div>
+                        {/* Kattu Pookal Garland in Right Column (Symmetric to Left Column garland) */}
+                        <div style={{ display: 'flex', justifyContent: 'center', width: '185px', marginTop: '15px' }}>
+                            <img src="/images/jasmine_garland.png" alt="Kattu Pookal" style={{ height: '175px', objectFit: 'contain' }} />
+                        </div>
                     </div>
                 </div>
 
@@ -755,14 +682,16 @@ const InvoiceView = () => {
                                         {lang === 'ta' ? (buyer.nameTa || buyer.name) : buyer.name}
                                     </h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0 }}>
-                                                <MapPin size={10} />
+                                        {buyer.address && buyer.address !== 'Local Market Customer' && (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0 }}>
+                                                    <MapPin size={10} />
+                                                </div>
+                                                <span style={{ fontSize: '11.5px', color: '#6E5D61', fontWeight: 600 }}>
+                                                    {buyer.address}
+                                                </span>
                                             </div>
-                                            <span style={{ fontSize: '11.5px', color: '#6E5D61', fontWeight: 600 }}>
-                                                {buyer.address || 'Local Market Customer'}
-                                            </span>
-                                        </div>
+                                        )}
                                         {buyer.contact && (
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0 }}>
@@ -898,15 +827,15 @@ const InvoiceView = () => {
 
                 {/* ── PRODUCTS TABLE ── */}
                 <div style={{ margin: '24px 0', border: '1px solid #D4AF37', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.01)' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', fontFamily: 'Montserrat, sans-serif' }}>
+                    <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '12px', fontFamily: 'Montserrat, sans-serif' }}>
                         <thead>
                             <tr style={{ background: '#7C1A3A', color: '#fff', borderBottom: '2px solid #D4AF37' }}>
-                                <th style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 700, width: '45px', whiteSpace: 'nowrap' }}>{activeText.slNo}</th>
-                                {from !== to && <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 700, width: '90px', whiteSpace: 'nowrap' }}>{activeText.date}</th>}
-                                <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{activeText.itemDesc}</th>
-                                <th style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 700, width: '105px', whiteSpace: 'nowrap' }}>{activeText.qty}</th>
-                                <th style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 700, width: '95px', whiteSpace: 'nowrap' }}>{activeText.rate}</th>
-                                <th style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 700, width: '115px', whiteSpace: 'nowrap' }}>{activeText.amount}</th>
+                                <th style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 900, fontSize: '13.5px', width: '8%', whiteSpace: 'nowrap' }}>{activeText.slNo}</th>
+                                {from !== to && <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 900, fontSize: '13.5px', width: '14%', whiteSpace: 'nowrap' }}>{activeText.date}</th>}
+                                <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 900, fontSize: '13.5px', width: '32%', whiteSpace: 'nowrap' }}>{activeText.itemDesc}</th>
+                                <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 900, fontSize: '13.5px', width: from !== to ? '14%' : '16%', whiteSpace: 'nowrap' }}>{activeText.qty}</th>
+                                <th style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 900, fontSize: '13.5px', width: from !== to ? '14%' : '20%', whiteSpace: 'nowrap' }}>{activeText.rate}</th>
+                                <th style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 900, fontSize: '13.5px', width: from !== to ? '18%' : '24%', whiteSpace: 'nowrap' }}>{activeText.amount}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -924,17 +853,17 @@ const InvoiceView = () => {
                                         fontWeight: 600,
                                         color: '#2C1E21'
                                     }}>
-                                        <td style={{ padding: '10px', textAlign: 'center', color: '#6E5D61' }}>{idx + 1}</td>
-                                        {from !== to && <td style={{ padding: '10px', textAlign: 'left', fontSize: '11px' }}>{item.date ? displayDate(item.date) : ''}</td>}
-                                        <td style={{ padding: '8px 10px', textAlign: 'left', color: '#7C1A3A', fontWeight: 700 }}>
+                                        <td style={{ padding: '10px', textAlign: 'center', color: '#6E5D61', width: '8%' }}>{idx + 1}</td>
+                                        {from !== to && <td style={{ padding: '10px', textAlign: 'left', fontSize: '11px', width: '14%' }}>{item.date ? displayDate(item.date) : ''}</td>}
+                                        <td style={{ padding: '8px 10px', textAlign: 'left', color: '#7C1A3A', fontWeight: 700, width: '32%' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <img src={getFlowerImage(item.flowerType)} alt="" style={{ width: '30px', height: '30px', borderRadius: '4px', objectFit: 'cover', border: '1.5px solid #F4E8C1', background: '#fff' }} />
                                                 <span>{lang === 'ta' ? (item.flowerTypeTa || item.flowerType) : item.flowerType}</span>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '10px', textAlign: 'right' }}>{Number(item.quantity).toFixed(3)}</td>
-                                        <td style={{ padding: '10px', textAlign: 'right' }}>{fmt(item.price)}</td>
-                                        <td style={{ padding: '10px', textAlign: 'right', fontWeight: 800 }}>{fmt(item.total)}</td>
+                                        <td style={{ padding: '10px', textAlign: 'left', width: from !== to ? '14%' : '16%' }}>{Number(item.quantity).toFixed(3)}</td>
+                                        <td style={{ padding: '10px', textAlign: 'right', width: from !== to ? '14%' : '20%' }}>{fmt(item.price)}</td>
+                                        <td style={{ padding: '10px', textAlign: 'right', fontWeight: 800, width: from !== to ? '18%' : '24%' }}>{fmt(item.total)}</td>
                                     </tr>
                                 ))
                             )}
@@ -945,9 +874,9 @@ const InvoiceView = () => {
                                     <td colSpan={from !== to ? 3 : 2} style={{ padding: '12px 10px', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                         Total
                                     </td>
-                                    <td style={{ padding: '12px 10px', textAlign: 'right' }}>{financials.totalKg.toFixed(3)} Kg</td>
-                                    <td style={{ padding: '12px 10px' }} />
-                                    <td style={{ padding: '12px 10px', textAlign: 'right', fontSize: '13px', fontWeight: 900 }}>{fmt(financials.todayTotal)}</td>
+                                    <td style={{ padding: '12px 10px', textAlign: 'left', width: from !== to ? '14%' : '16%' }}>{financials.totalKg.toFixed(3)} Kg</td>
+                                    <td style={{ padding: '12px 10px', width: from !== to ? '14%' : '20%' }} />
+                                    <td style={{ padding: '12px 10px', textAlign: 'right', fontSize: '13px', fontWeight: 900, width: from !== to ? '18%' : '24%' }}>{fmt(financials.todayTotal)}</td>
                                 </tr>
                             )}
                         </tbody>
@@ -956,87 +885,35 @@ const InvoiceView = () => {
 
                 {/* ── LOWER SECTION: DUES STATEMENT & PAYMENT ── */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '30px', margin: '30px 0 10px' }}>
-                    {/* Left: Notes & Special Offer Unified Card */}
+                    {/* Left: Tamil Info Box instead of Notes & Special Offer */}
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1.3fr 1fr',
-                        gap: '15px',
+                        display: 'flex',
                         alignItems: 'center',
-                        padding: '16px 18px',
+                        justifyContent: 'space-between',
+                        gap: '20px',
+                        padding: '20px 24px',
                         background: '#FFFDF9',
-                        border: '1.5px solid #D4AF37',
+                        border: '2px solid #D4AF37',
                         borderRadius: '16px',
                         boxShadow: '0 4px 12px rgba(124, 26, 58, 0.02)',
                         boxSizing: 'border-box',
-                        textAlign: 'left',
-                        position: 'relative'
+                        minHeight: '135px'
                     }}>
-                        {/* Left Half: Notes list */}
-                        <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                                <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: '20px', fontWeight: 800, color: '#7C1A3A' }}>
-                                    Notes:
-                                </span>
-                                <span style={{ fontSize: '14px' }}>🌸</span>
-                            </div>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '9.5px', fontWeight: 600, color: '#2C1E21' }}>
-                                <li style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: '1.3' }}>
-                                    <span style={{ color: '#1E4620', fontWeight: 800, fontSize: '10px' }}>♣</span>
-                                    <span>Please make the payment on or before the due date.</span>
-                                </li>
-                                <li style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: '1.3' }}>
-                                    <span style={{ color: '#1E4620', fontWeight: 800, fontSize: '10px' }}>♣</span>
-                                    <span>Late payment may attract additional charges.</span>
-                                </li>
-                                <li style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: '1.3' }}>
-                                    <span style={{ color: '#1E4620', fontWeight: 800, fontSize: '10px' }}>♣</span>
-                                    <span>Goods once sold will not be taken back.</span>
-                                </li>
-                                <li style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: '1.3' }}>
-                                    <span style={{ color: '#1E4620', fontWeight: 800, fontSize: '10px' }}>♣</span>
-                                    <span>Thank you for choosing <strong style={{ color: '#7C1A3A', fontWeight: 800 }}>{tenantInfo?.name || 'MMA fresh flowers'}</strong>!</span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        {/* Right Half: Special Offer Card with vintage design & rose bouquet */}
-                        <div style={{
-                            border: '1.5px solid #D4AF37',
-                            borderRadius: '12px',
-                            background: '#FFFDF9',
-                            padding: '16px 12px',
-                            position: 'relative',
-                            textAlign: 'center',
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.01)',
-                            minHeight: '100px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center'
+                        <img src="/images/flower_corner_top.png" alt="" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
+                        <span style={{
+                            flex: 1,
+                            fontFamily: 'Playfair Display, Georgia, serif',
+                            fontSize: '18px',
+                            fontWeight: 800,
+                            color: '#7C1A3A',
+                            lineHeight: '1.6',
+                            letterSpacing: '0.02em',
+                            display: 'block',
+                            textAlign: 'center'
                         }}>
-                            {/* Overlapping rose cluster bottom-left */}
-                            <img
-                                src="/images/flower_corner_top.png"
-                                alt=""
-                                style={{
-                                    position: 'absolute',
-                                    bottom: '-12px',
-                                    left: '-16px',
-                                    width: '55px',
-                                    zIndex: 1,
-                                    pointerEvents: 'none'
-                                }}
-                            />
-                            
-                            <h4 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: '16px', fontWeight: 800, color: '#7C1A3A', margin: '0 0 6px', zIndex: 2 }}>
-                                Special Offer
-                            </h4>
-                            <div style={{ fontSize: '10.5px', fontWeight: 800, color: '#2C1E21', lineHeight: '1.4', zIndex: 2 }}>
-                                <div>Bulk Orders</div>
-                                <div>At Special</div>
-                                <div>Discounts</div>
-                            </div>
-                        </div>
+                            எங்களிடம் கல்யாண மாலையும் கட்டுப் பூக்களும் கிடைக்கும்.
+                        </span>
+                        <img src="/images/flower_corner_top.png" alt="" style={{ width: '45px', height: '45px', objectFit: 'contain', transform: 'scaleX(-1)' }} />
                     </div>
 
                     {/* Right: Calculations Dues Summary Block */}
@@ -1048,27 +925,27 @@ const InvoiceView = () => {
                             overflow: 'hidden',
                             boxShadow: '0 4px 10px rgba(0,0,0,0.01)'
                         }}>
-                            <div style={{ background: '#7C1A3A', color: '#fff', padding: '10px 15px', textAlign: 'center', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                            <div style={{ background: '#7C1A3A', color: '#fff', padding: '12px 15px', textAlign: 'center', fontSize: '13px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                                 {activeText.duesSummary}
                             </div>
-                            <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11px', fontWeight: 600, color: '#2C1E21', textAlign: 'left' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#6E5D61' }}>{activeText.openingBal}:</span>
-                                    <span>{fmt(financials.openingBalance)}</span>
+                            <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '11px', fontSize: '13px', fontWeight: 700, color: '#2C1E21', textAlign: 'left' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ color: '#2C1E21', fontWeight: 800 }}>{activeText.openingBal}:</span>
+                                    <span style={{ fontWeight: 800 }}>{fmt(financials.openingBalance)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #F4E8C1', paddingBottom: '6px' }}>
-                                    <span style={{ color: '#6E5D61' }}>{activeText.todaysSales}:</span>
-                                    <span style={{ color: '#b91c1c', fontWeight: 700 }}>+ {fmt(financials.todayTotal)}</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #F4E8C1', paddingBottom: '8px' }}>
+                                    <span style={{ color: '#2C1E21', fontWeight: 800 }}>{activeText.todaysSales}:</span>
+                                    <span style={{ color: '#b91c1c', fontWeight: 900 }}>+ {fmt(financials.todayTotal)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#6E5D61' }}>{activeText.amtRec}:</span>
-                                    <span style={{ color: '#16a34a', fontWeight: 700 }}>- {fmt(financials.cashRec)}</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ color: '#2C1E21', fontWeight: 800 }}>{activeText.amtRec}:</span>
+                                    <span style={{ color: '#16a34a', fontWeight: 900 }}>- {fmt(financials.cashRec)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1.5px solid #D4AF37', paddingBottom: '8px' }}>
-                                    <span style={{ color: '#6E5D61' }}>{activeText.cashLess}:</span>
-                                    <span style={{ color: '#16a34a', fontWeight: 700 }}>- {fmt(financials.cashLess)}</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1.5px solid #D4AF37', paddingBottom: '10px' }}>
+                                    <span style={{ color: '#2C1E21', fontWeight: 800 }}>{activeText.cashLess}:</span>
+                                    <span style={{ color: '#16a34a', fontWeight: 900 }}>- {fmt(financials.cashLess)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '4px', fontSize: '13px', fontWeight: 900, color: '#7C1A3A' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', fontSize: '15.5px', fontWeight: 950, color: '#7C1A3A' }}>
                                     <span>{activeText.balDues}:</span>
                                     <span>{fmt(financials.balanceDues)}</span>
                                 </div>
@@ -1103,29 +980,11 @@ const InvoiceView = () => {
                     </div>
 
                     {/* Right: Signature Line */}
-                    <div style={{ textAlign: 'right', minWidth: '180px', marginRight: '35px' }}>
-                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#2C1E21', whiteSpace: 'nowrap', marginBottom: '8px' }}>
-                            For, {tenantId === 'mma' ? 'MMA fresh flowers' : `${tenantInfo?.name || ''} ${tenantInfo?.type || ''}`}
-                        </div>
-                        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', width: '180px' }}>
-                            <span style={{
-                                fontFamily: 'Mrs Saint Delafield, Great Vibes, cursive',
-                                fontSize: '32px',
-                                color: '#7C1A3A',
-                                whiteSpace: 'nowrap',
-                                borderBottom: '1.2px solid #7C1A3A',
-                                width: '100%',
-                                textAlign: 'center',
-                                paddingBottom: '2px',
-                                lineHeight: '0.8',
-                                display: 'block'
-                            }}>
-                                {tenantId === 'mma' ? 'M. Mohamed Ameen' : (tenantInfo?.proprietor || 'Authorized Signatory')}
-                            </span>
-                            <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#2C1E21', marginTop: '4px' }}>
-                                Proprietor
-                            </span>
-                        </div>
+                    {/* Right: Signature Line (Simplified as requested) */}
+                    <div style={{ textAlign: 'right', minWidth: '180px', marginRight: '35px', display: 'flex', alignItems: 'center' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#7C1A3A', whiteSpace: 'nowrap' }}>
+                            For, {tenantId === 'mma' ? 'MMA Fresh Flowers' : `${tenantInfo?.name || ''} ${tenantInfo?.type || ''}`}
+                        </span>
                     </div>
                 </div>
 

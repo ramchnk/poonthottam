@@ -33,13 +33,19 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
     const [cursor, setCursor]       = useState(0);
     const listRef                   = useRef(null);
 
+    const formatName = (item) => {
+        if (!item) return '';
+        const tamilName = item.nameTa || item.taName;
+        return tamilName ? `${item.name}-${tamilName}` : item.name;
+    };
+
     const selectedItem = items.find(i => i.id === value || i.name === value);
-    const selectedName = selectedItem ? (lang === 'ta' ? (selectedItem.nameTa || selectedItem.taName || selectedItem.name) : selectedItem.name) : '';
+    const selectedName = selectedItem ? formatName(selectedItem) : '';
 
     const filtered = query.trim()
         ? items.filter(i => {
             const n = i.name?.toLowerCase() || '';
-            const tn = i.taName?.toLowerCase() || '';
+            const tn = (i.nameTa || i.taName || '').toLowerCase();
             const q = query.toLowerCase();
             return n.includes(q) || tn.includes(q) || (i.displayId && String(i.displayId).includes(query));
         })
@@ -47,7 +53,7 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
 
     const choose = (item) => {
         onChange(item);
-        setQuery(lang === 'ta' ? (item.nameTa || item.taName || item.name) : item.name);
+        setQuery(formatName(item));
         setOpen(false);
     };
 
@@ -122,7 +128,7 @@ const SearchSelect = ({ items, value, onChange, onKeyDown, inputRef, placeholder
                             onMouseEnter={() => setCursor(i)}
                         >
                             {item.displayId && <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8' }}>{idPrefix}{item.displayId}</span>}
-                            {lang === 'ta' ? (item.nameTa || item.name) : item.name}
+                            {formatName(item)}
                         </li>
                     ))}
                 </ul>
@@ -302,7 +308,7 @@ const OutsideShop = () => {
     }, [minStartDate]);
 
     const toDateStr = (d) => d.toISOString().split('T')[0];
-    const fmt = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
+    const fmt = (n) => `${Number(n).toLocaleString('en-IN')}`;
     const formatTime = (ts) => {
         if (!ts) return '--:--';
         // Handle Firestore Timestamp, Date object, or fallback to createdAt
@@ -1933,7 +1939,7 @@ const OutsideShop = () => {
                                     onMouseLeave={e => Object.assign(e.currentTarget.style, { background: '#f5f3ff' })}
                                     title="Click to auto-fill this amount"
                                 >
-                                    {t('purchase') || 'Purchase'}: ₹{purchaseTotalForPayment}
+                                    {t('purchase') || 'Purchase'}: {purchaseTotalForPayment}
                                 </span>
                             )}
                         </div>
@@ -2420,7 +2426,6 @@ const OutsideShop = () => {
                                                 {isBulkModeActive && (
                                                     <td style={{...TD_S, textAlign: 'center'}}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
-                                                            <span style={{ fontWeight: 600, color: '#64748b', fontSize: '12px' }}>₹</span>
                                                             <input 
                                                                 type="number"
                                                                 value={bulkPayingAmounts[v.id] || ''}
@@ -2920,7 +2925,6 @@ const OutsideShop = () => {
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <label style={{ fontSize: '13px', fontWeight: 900, color: '#16a34a' }}>PAYING AMOUNT (TOTAL):</label>
                                                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                                    <span style={{ position: 'absolute', left: '12px', fontWeight: 800, color: '#16a34a', fontSize: '18px' }}>₹</span>
                                                     <input 
                                                         type="number"
                                                         value={customSettleAmount}
@@ -2931,7 +2935,7 @@ const OutsideShop = () => {
                                                             fontSize: '18px', 
                                                             fontWeight: 900, 
                                                             color: '#16a34a', 
-                                                            paddingLeft: '28px',
+                                                            paddingLeft: '12px',
                                                             borderColor: '#86efac',
                                                             background: '#f0fdf4'
                                                         }}

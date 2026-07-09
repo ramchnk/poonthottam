@@ -3,6 +3,19 @@ import './index.css'
 import '../style.css'
 import App from './App.jsx'
 
+
+// Globally remove Rupee symbols (₹ and Rs.) from all dynamic number/currency formatting
+const originalFormatGetter = Object.getOwnPropertyDescriptor(Intl.NumberFormat.prototype, 'format').get;
+Object.defineProperty(Intl.NumberFormat.prototype, 'format', {
+  get() {
+    const originalBoundFormat = originalFormatGetter.call(this);
+    return function(value) {
+      const result = originalBoundFormat(value);
+      return typeof result === 'string' ? result.replace(/₹/g, '').replace(/Rs\./g, '').trim() : result;
+    };
+  }
+});
+
 // Overwrite window.alert and setup global window.toast
 window.toast = {
   success: (msg) => window.dispatchEvent(new CustomEvent('app-toast', { detail: { message: msg, type: 'success' } })),

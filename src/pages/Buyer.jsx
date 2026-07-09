@@ -450,11 +450,27 @@ const Buyer = () => {
                                                 borderColor: isHighlighted ? 'rgba(255,255,255,0.4)' : '#bbf7d0'
                                             }}>#{buyer.displayId}</span>
                                         </td>
-                                        <td style={{...S.td, fontWeight:700, color: isHighlighted ? '#fff' : '#1e293b'}}>
-                                            {lang === 'ta' ? (buyer.nameTa || buyer.name) : buyer.name}
+                                        <td style={{...S.td, color: isHighlighted ? '#fff' : '#1e293b', padding: '8px 14px' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                <span style={{ fontWeight: 800, fontSize: '14.5px' }}>{buyer.name}</span>
+                                                {buyer.nameTa && (
+                                                    <span style={{ 
+                                                        fontWeight: 600, 
+                                                        fontSize: '12.5px', 
+                                                        color: isHighlighted ? 'rgba(255,255,255,0.85)' : '#6b7280' 
+                                                    }}>
+                                                        {buyer.nameTa}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td style={{...S.td, color: isHighlighted ? 'rgba(255,255,255,0.9)' : '#6b7280'}}>{buyer.contact || '—'}</td>
-                                        <td style={{...S.td, color: isHighlighted ? 'rgba(255,255,255,0.9)' : '#6b7280'}}>
+                                        <td style={{
+                                            ...S.td,
+                                            color: isHighlighted ? 'rgba(255,255,255,0.9)' : '#6b7280',
+                                            fontSize: '12.5px',
+                                            fontWeight: 700
+                                        }}>
                                             {lang === 'ta' ? (buyer.placeTa || buyer.place || '—') : (buyer.place || '—')}
                                         </td>
                                         <td style={{...S.td, textAlign:'right', fontWeight:700, color: isHighlighted ? '#fff' : (buyer.balance > 0 ? '#f43f5e' : '#16a34a')}}>

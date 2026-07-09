@@ -243,7 +243,7 @@ export async function generateBuyerReceiptCanvas({
     ctx.lineWidth = 3.0;
     rect(PAD, y, W - PAD*2, 70);
     drawText(grandTotalLabel, PAD + 20, y + 35, { size: 28, weight: '900' });
-    drawText(`₹${fmtNum(absGrandTotal, 2)}`, W - PAD - 20, y + 35, { size: 36, weight: '900', align: 'right' });
+    drawText(`${fmtNum(absGrandTotal, 2)}`, W - PAD - 20, y + 35, { size: 36, weight: '900', align: 'right' });
     y += 90;
     ctx.lineWidth = 1.5;
 
@@ -874,7 +874,7 @@ export async function generatePaymentReceiptCanvas({
 
     drawRow(y, dateLabel, displayDate);
     drawRow(y + 70, nameLabel, (entity.nameTa && lang === 'ta') ? entity.nameTa : entity.name);
-    drawRow(y + 140, amountLabel, `Rs. ${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(payment.amount)}`, true, amountColor);
+    drawRow(y + 140, amountLabel, `${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(payment.amount)}`, true, amountColor);
     
     y += 260;
     drawText(thankYou, W/2, y, { size: 28, align: 'center' });

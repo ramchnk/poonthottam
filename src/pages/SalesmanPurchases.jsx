@@ -258,7 +258,7 @@ const SalesmanPurchases = () => {
         return purchaseRecords.filter(p => p.date === formData.date && (!formData.salesmanId || p.salesmanId === formData.salesmanId));
     }, [purchaseRecords, formData.date, formData.salesmanId]);
 
-    const fmt = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
+    const fmt = (n) => `${Number(n).toLocaleString('en-IN')}`;
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: 'var(--font-sans)' }}>
@@ -435,7 +435,7 @@ const SalesmanPurchases = () => {
                                 <tr key={item.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                     <td style={{...TD_S, fontWeight: 700}}>{item.flowerTypeLocalized}</td>
                                     <td style={{...TD_S, textAlign: 'center'}}>{item.quantity.toFixed(3)}</td>
-                                    <td style={{...TD_S, textAlign: 'center'}}>₹{item.price}</td>
+                                    <td style={{...TD_S, textAlign: 'center'}}>{item.price}</td>
                                     <td style={{...TD_S, textAlign: 'right', color: '#ea580c', fontWeight: 700}}>{fmt(item.total)}</td>
                                     <td style={{...TD_S, textAlign: 'center'}}>
                                         <button onClick={() => handleRemoveItem(item.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>

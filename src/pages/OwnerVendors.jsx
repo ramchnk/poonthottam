@@ -254,7 +254,7 @@ const OwnerVendors = () => {
                     <td className="p-4 text-slate-600 font-mono">{v.mobile || '---'}</td>
                     <td className="p-4 text-slate-600">{v.location || '---'}</td>
                     <td className="p-4 font-mono text-sm text-slate-900">
-                      ₹{(v.balance || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                      {(v.balance || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                     </td>
                     <td className="p-4 text-center relative">
                       <button
@@ -378,7 +378,7 @@ const OwnerVendors = () => {
 
               {vendorForm.id && (
                 <div>
-                  <label style={LABEL_S}>Outstanding Balance (₹) (Read-only)</label>
+                  <label style={LABEL_S}>Outstanding Balance (Read-only)</label>
                   <input
                     type="number"
                     disabled

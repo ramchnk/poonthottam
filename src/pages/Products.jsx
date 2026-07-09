@@ -114,7 +114,7 @@ const Products = () => {
                         <div className="flex items-center justify-between mt-auto pt-6 border-t border-gray-100">
                             <div className="bg-gray-100 px-4 py-1 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:bg-orange-50 group-hover:text-orange-400 transition-colors">Market Rate</div>
                             <div className="text-2xl font-black text-gray-800 group-hover:text-orange-600 transition-colors">
-                                ₹{product.price}<span className="text-sm text-gray-400 font-bold italic ml-1">/{product.unit}</span>
+                                {product.price}<span className="text-sm text-gray-400 font-bold italic ml-1">/{product.unit}</span>
                             </div>
                         </div>
                     </div>
@@ -151,7 +151,7 @@ const Products = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-8">
                                 <div className="space-y-4">
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest pl-2">Benchmark Rate (₹)</label>
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest pl-2">Benchmark Rate</label>
                                     <input 
                                         type="number" 
                                         className="w-full px-8 py-5 rounded-[24px] bg-gray-50 border-3 border-transparent focus:border-orange-500 focus:bg-white transition-all outline-none text-3xl font-black text-gray-800 shadow-inner" 

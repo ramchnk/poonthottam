@@ -138,7 +138,7 @@ const Intake = () => {
                             >
                                 <option value="">Select Farmer Name</option>
                                 {farmers.map(f => (
-                                    <option key={f.id} value={f.id}>{f.name} — Balance: ₹{f.balance || 0}</option>
+                                    <option key={f.id} value={f.id}>{f.name} — Balance: {f.balance || 0}</option>
                                 ))}
                             </select>
                         </div>
@@ -146,7 +146,7 @@ const Intake = () => {
                         <div className="flex items-center gap-4 bg-white/50 px-6 py-4 rounded-2xl border border-white">
                              <div className="text-center">
                                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Outstanding</p>
-                                 <p className="text-xl font-black text-red-500 tracking-tight">₹{summary.outstanding.toFixed(2)}</p>
+                                 <p className="text-xl font-black text-red-500 tracking-tight">{summary.outstanding.toFixed(2)}</p>
                              </div>
                         </div>
                     </div>
@@ -188,7 +188,6 @@ const Intake = () => {
                                     <Package size={12} /> Price / விலை
                                 </label>
                                 <div className="bg-white rounded-[20px] p-5 shadow-xl flex items-center">
-                                    <span className="text-2xl font-black text-emerald-500 mr-2">₹</span>
                                     <input
                                         type="number"
                                         value={currentItem.price}
@@ -214,8 +213,8 @@ const Intake = () => {
                                 <tr className="bg-emerald-50/30">
                                     <th className="px-6 py-5 text-xs font-black text-emerald-800 uppercase tracking-widest text-left">Purchased Items</th>
                                     <th className="px-6 py-5 text-xs font-black text-emerald-800 uppercase tracking-widest text-center">Batch Qty</th>
-                                    <th className="px-6 py-5 text-xs font-black text-emerald-800 uppercase tracking-widest text-right">Rate (₹)</th>
-                                    <th className="px-6 py-5 text-xs font-black text-emerald-800 uppercase tracking-widest text-right">Total (₹)</th>
+                                    <th className="px-6 py-5 text-xs font-black text-emerald-800 uppercase tracking-widest text-right">Rate</th>
+                                    <th className="px-6 py-5 text-xs font-black text-emerald-800 uppercase tracking-widest text-right">Total</th>
                                     <th className="px-6 py-5 text-xs font-black text-emerald-800 uppercase tracking-widest text-center">Delete</th>
                                 </tr>
                             </thead>
@@ -230,8 +229,8 @@ const Intake = () => {
                                                 {item.quantity} Kg
                                             </span>
                                         </td>
-                                        <td className="px-6 py-6 text-right font-bold text-gray-400 italic">₹{item.price}</td>
-                                        <td className="px-6 py-6 text-right font-black text-emerald-700 text-xl tracking-tighter">₹{item.total.toFixed(2)}</td>
+                                        <td className="px-6 py-6 text-right font-bold text-gray-400 italic">{item.price}</td>
+                                        <td className="px-6 py-6 text-right font-black text-emerald-700 text-xl tracking-tighter">{item.total.toFixed(2)}</td>
                                         <td className="px-6 py-6 text-center">
                                             <button onClick={() => handleRemoveItem(item.id)} className="p-3 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all">
                                                 <Trash2 size={24} />
@@ -263,7 +262,7 @@ const Intake = () => {
                         <div className="mb-10 animate-in slide-in-from-right duration-500">
                              <div className="text-xs font-bold text-emerald-100/50 mb-1 ml-1 tracking-widest">INWARD TOTAL</div>
                              <div className="text-7xl font-black tracking-tighter shadow-emerald-700/50 drop-shadow-2xl">
-                                ₹{totalFlowerCost.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                {totalFlowerCost.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                              </div>
                              <p className="text-emerald-300 font-black text-xl italic mt-1 ml-1 opacity-70">Calculated Batch Cost</p>
                         </div>
@@ -272,7 +271,6 @@ const Intake = () => {
                             <div className="space-y-3">
                                 <label className="block text-xs font-black text-emerald-100 uppercase tracking-widest pl-1">Cash Paid to Farmer</label>
                                 <div className="bg-emerald-700/50 rounded-2xl border-2 border-white/20 p-2 flex items-center">
-                                    <span className="text-2xl font-black px-4">₹</span>
                                     <input
                                         type="number"
                                         value={summary.amountPaid}
@@ -284,7 +282,7 @@ const Intake = () => {
                             </div>
                             <div className="flex justify-between items-center text-emerald-100 font-bold text-lg pt-4 border-t border-white/5">
                                 <span className="uppercase tracking-tighter text-sm">Remaining Due</span>
-                                <span className="font-black text-3xl tracking-tighter">₹{balanceAmount.toFixed(2)}</span>
+                                <span className="font-black text-3xl tracking-tighter">{balanceAmount.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>

@@ -43,6 +43,7 @@ export const COLLECTIONS = {
   DAILY_CASH: 'salesman_daily_cash',
   FLOWER_PURCHASES: 'salesman_flower_purchases',
   CREDIT_TRANSFERS: 'salesman_credit_transfers',
+  DAILY_FLOWER_PRICES: 'daily_flower_prices',
   DAILY_LEDGERS: 'salesman_daily_ledgers',
 };
 
@@ -617,6 +618,37 @@ export const deleteProduct = async (id) => {
   console.log("Firestore deleteDoc starting for collection 'products', doc ID:", id);
   await deleteDoc(doc(db, COLLECTIONS.PRODUCTS, id));
   console.log("Firestore deleteDoc finished for ID:", id);
+};
+
+// ── Daily Flower Price List ──
+export const getDailyFlowerPrices = async (date) => {
+  const tenantId = getTenant();
+  const id = `${tenantId}_${date}`;
+  const snap = await getDoc(doc(db, COLLECTIONS.DAILY_FLOWER_PRICES, id));
+  if (snap.exists()) {
+    return { id: snap.id, ...snap.data() };
+  }
+  return null;
+};
+
+export const saveDailyFlowerPrices = async (date, priceData) => {
+  const tenantId = getTenant();
+  const id = `${tenantId}_${date}`;
+  const docRef = doc(db, COLLECTIONS.DAILY_FLOWER_PRICES, id);
+  
+  const snap = await getDoc(docRef);
+  const payload = {
+    ...priceData,
+    tenantId,
+    date,
+    updatedAt: serverTimestamp()
+  };
+  
+  if (!snap.exists()) {
+    payload.createdAt = serverTimestamp();
+  }
+  
+  await setDoc(docRef, payload, { merge: true });
 };
 
 
