@@ -540,7 +540,7 @@ const DailyFlowerPrices = () => {
   return (
     <div className="flex flex-col lg:flex-row gap-8 min-h-[80vh] p-1 lg:p-4">
       {/* LEFT COLUMN: Data Entry & Configuration (60% width) */}
-      <div className="w-full lg:w-3/5 bg-white rounded-[28px] border border-slate-100 shadow-xl p-6 flex flex-col justify-between">
+      <div className="w-full lg:w-3/5 bg-white rounded-[28px] border border-slate-100 shadow-xl p-6 flex flex-col">
         <div>
           {/* Header Panel */}
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5 mb-6">
@@ -633,7 +633,7 @@ const DailyFlowerPrices = () => {
               </p>
             </div>
           ) : (
-            <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-[50vh] overflow-y-auto shadow-sm">
+            <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-[72vh] overflow-y-auto shadow-sm">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/70 border-b border-slate-100">
@@ -704,7 +704,7 @@ const DailyFlowerPrices = () => {
           )}
 
           {/* Config Settings Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 bg-slate-50 border border-slate-100 rounded-2xl p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-slate-50 border border-slate-100 rounded-2xl p-4">
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{lang === 'ta' ? 'பட்டயல் எண்/வகை (எ.கா: Rate - 1)' : 'Rate Card Version (e.g., Rate - 1)'}</label>
               <input
@@ -729,7 +729,7 @@ const DailyFlowerPrices = () => {
         </div>
 
         {/* Footer Meta & Save Button */}
-        <div className="flex flex-wrap items-center justify-between border-t border-slate-100 pt-5 mt-6 gap-4">
+        <div className="flex flex-wrap items-center justify-between border-t border-slate-100 pt-4 mt-4 gap-4">
           <div className="text-slate-400 text-xs font-semibold">
             {lastUpdated && (
               <span className="flex flex-col">
