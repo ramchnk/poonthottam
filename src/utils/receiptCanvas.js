@@ -338,7 +338,7 @@ export async function generateLedgerCanvas({
 
         const displayStartDate = startDate ? startDate.split('-').reverse().join('/') : '';
         const allRows = [
-            { date: displayStartDate, particulars: openingBalLabel, weight: '0.000', rate: '0', total: openingBalance, cashRec: 0, cashLess: 0, isOpening: true },
+            { date: displayStartDate, particulars: openingBalLabel, weight: '0.00', rate: '0', total: openingBalance, cashRec: 0, cashLess: 0, isOpening: true },
             ...ledgerRows
         ];
 
@@ -744,7 +744,7 @@ export async function generateLedgerCanvas({
     };
 
     const displayStartDate = startDate ? startDate.split('-').reverse().join('/') : '';
-    drawRow(y, { date: displayStartDate, particulars: openingBalLabel, weight: '0.000', rate: '0', total: fmtNum(openingBalance), cashRec: '0', cashLess: '0' }, true);
+    drawRow(y, { date: displayStartDate, particulars: openingBalLabel, weight: '0.00', rate: '0', total: fmtNum(openingBalance), cashRec: '0', cashLess: '0' }, true);
     y += LINE_H;
 
     // Data Rows

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Printer, ArrowLeft, Globe, CreditCard, Check, Sparkles, FileText, Calendar, Clock, Phone, MapPin, Mail } from 'lucide-react';
+import { Printer, ArrowLeft, Globe, CreditCard, Check, Sparkles, FileText, Calendar, Clock, Phone, MapPin, Mail, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
 const toDateStr = (d) => {
@@ -175,10 +175,23 @@ const InvoiceView = () => {
     const handleDownloadImage = async () => {
         const element = document.querySelector('.invoice-container');
         if (!element) return;
+        
+        // Save original styles
+        const origWidth = element.style.width;
+        const origMaxWidth = element.style.maxWidth;
+        
         try {
+            // Lock dimensions during capture to match standard desktop look
+            element.style.width = '840px';
+            element.style.maxWidth = '840px';
+            
             const canvas = await html2canvas(element, {
                 useCORS: true,
-                scale: 2
+                allowTaint: false,
+                scale: 2,
+                backgroundColor: '#FFFDF9',
+                scrollX: 0,
+                scrollY: -window.scrollY
             });
             const imgData = canvas.toDataURL('image/png');
             const link = document.createElement('a');
@@ -188,6 +201,10 @@ const InvoiceView = () => {
         } catch (err) {
             console.error('Error downloading invoice image:', err);
             alert('Failed to generate image download.');
+        } finally {
+            // Restore original style parameters
+            element.style.width = origWidth;
+            element.style.maxWidth = origMaxWidth;
         }
     };
 
@@ -410,6 +427,26 @@ const InvoiceView = () => {
                         <Printer size={14} /> Print / Save PDF
                     </button>
 
+                    {/* Download Image Button */}
+                    <button
+                        onClick={handleDownloadImage}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            borderRadius: '8px',
+                            border: '1.5px solid #e2e8f0',
+                            background: '#fff',
+                            color: '#2c3e50',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <Download size={14} /> Download Image
+                    </button>
+
 
                 </div>
             </div>
@@ -440,205 +477,186 @@ const InvoiceView = () => {
                 <img src="/images/flower_corner_top.png" alt="" style={{ position: 'absolute', bottom: '4px', right: '4px', width: '65px', transform: 'scaleX(-1)', pointerEvents: 'none', zIndex: 2 }} />
 
                 {/* ── HEADER SECTION ── */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '15px', marginTop: '35px', borderBottom: '2px solid #F4E8C1', paddingBottom: '24px', boxSizing: 'border-box' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', marginTop: '35px', borderBottom: '2px solid #F4E8C1', paddingBottom: '24px', boxSizing: 'border-box' }}>
                     
-                    {/* Left Column: Contact details & Medallion */}
-                    <div style={{ width: '185px', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', marginTop: '12px', paddingLeft: '15px', boxSizing: 'border-box' }}>
-                        {/* Phone row */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0 }}>
-                                <Phone size={13} />
+                    {/* Top Row: Info Columns */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '15px', width: '100%', boxSizing: 'border-box' }}>
+                        
+                        {/* Left Column: Contact details */}
+                        <div style={{ width: '240px', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', marginTop: '12px', paddingLeft: '15px', boxSizing: 'border-box' }}>
+                            {/* Phone row */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0 }}>
+                                    <Phone size={13} />
+                                </div>
+                                <span style={{ fontSize: '12px', color: '#2C1E21', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                    {tenantInfo?.phone1 || '9047022045'}
+                                </span>
                             </div>
-                            <span style={{ fontSize: '12px', color: '#2C1E21', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                                {tenantInfo?.phone1 || '9047022045'}
-                            </span>
-                        </div>
-                        {/* Email row */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0 }}>
-                                <Mail size={13} />
+                            {/* Email row */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0 }}>
+                                    <Mail size={13} />
+                                </div>
+                                <span style={{ fontSize: '12px', color: '#2C1E21', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                    {tenantInfo?.email || 'mmafreshflowers@gmail.com'}
+                                </span>
                             </div>
-                            <span style={{ fontSize: '12px', color: '#2C1E21', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                                {tenantInfo?.email || 'mmafreshflowers@gmail.com'}
-                            </span>
-                        </div>
-                        {/* Address row */}
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0, marginTop: '2px' }}>
-                                <MapPin size={13} />
+                            {/* Address row */}
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0, marginTop: '2px' }}>
+                                    <MapPin size={13} />
+                                </div>
+                                <span style={{ fontSize: '12px', color: '#2C1E21', fontWeight: 700, lineHeight: '1.4' }}>
+                                    {tenantInfo?.address || '123, Flower Market, Avinashi Road, Coimbatore - 641 037, Tamil Nadu, India.'}
+                                </span>
                             </div>
-                            <span style={{ fontSize: '12px', color: '#2C1E21', fontWeight: 700, lineHeight: '1.4' }}>
-                                {tenantInfo?.address || '123, Flower Market, Avinashi Road, Coimbatore - 641 037, Tamil Nadu, India.'}
-                            </span>
                         </div>
-                        {/* Garland in Left Column */}
-                        <div style={{ display: 'flex', justifyContent: 'center', width: '185px', marginTop: '15px' }}>
-                            <img src="/images/flower_garland.png" alt="Garland" style={{ height: '175px', objectFit: 'contain' }} />
-                        </div>
-                    </div>
 
-                    {/* Center Column: Logo & Tamil Banners (Centered relative to invoice width) */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'center' }}>
-                        {tenantId === 'mma' ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <span style={{ fontFamily: 'Amiri, Georgia, serif', color: '#7C1A3A', fontSize: '72px', fontWeight: 900, letterSpacing: '0.03em', lineHeight: '1' }}>MMA</span>
-                                    <svg width="72" height="72" viewBox="0 0 64 64" style={{ marginLeft: '4px', flexShrink: 0, transform: 'translateY(10px)' }}>
-                                        {/* Stem */}
-                                        <path d="M32,32 Q45,35 48,55" fill="none" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" />
-                                        {/* Leaf 1 */}
-                                        <path d="M38,40 Q46,36 50,44 Q42,46 38,40 Z" fill="#2d6a4f" />
-                                        {/* Leaf 2 */}
-                                        <path d="M43,48 Q49,43 54,50 Q46,52 43,48 Z" fill="#2d6a4f" />
-                                        {/* Petals */}
-                                        <path d="M32,24 C32,12 24,12 24,20 C24,28 32,28 32,24 Z" fill="#C81B54" />
-                                        <path d="M24,28 C14,28 14,20 22,20 C30,20 30,28 24,28 Z" fill="#C81B54" />
-                                        <path d="M40,28 C50,28 50,20 42,20 C34,20 34,28 40,28 Z" fill="#C81B54" />
-                                        <path d="M27,33 C18,39 23,45 28,40 C33,35 32,29 27,33 Z" fill="#C81B54" />
-                                        <path d="M37,33 C46,39 41,45 36,40 C31,35 32,29 37,33 Z" fill="#C81B54" />
-                                        {/* Center */}
-                                        <circle cx="32" cy="26" r="4.5" fill="#FCD34D" />
-                                        <circle cx="32" cy="26" r="2" fill="#fff" />
+                        {/* Center Column: Logo & Tamil Banners (Centered relative to invoice width) */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'center' }}>
+                            {tenantId === 'mma' ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ fontFamily: 'Amiri, Georgia, serif', color: '#7C1A3A', fontSize: '98px', fontWeight: 900, letterSpacing: '0.03em', lineHeight: '1' }}>MMA</span>
+                                        <svg width="84" height="84" viewBox="0 0 64 64" style={{ marginLeft: '4px', flexShrink: 0, transform: 'translateY(12px)' }}>
+                                            {/* Stem */}
+                                            <path d="M32,32 Q45,35 48,55" fill="none" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" />
+                                            {/* Leaf 1 */}
+                                            <path d="M38,40 Q46,36 50,44 Q42,46 38,40 Z" fill="#2d6a4f" />
+                                            {/* Leaf 2 */}
+                                            <path d="M43,48 Q49,43 54,50 Q46,52 43,48 Z" fill="#2d6a4f" />
+                                            {/* Petals */}
+                                            <path d="M32,24 C32,12 24,12 24,20 C24,28 32,28 32,24 Z" fill="#C81B54" />
+                                            <path d="M24,28 C14,28 14,20 22,20 C30,20 30,28 24,28 Z" fill="#C81B54" />
+                                            <path d="M40,28 C50,28 50,20 42,20 C34,20 34,28 40,28 Z" fill="#C81B54" />
+                                            <path d="M27,33 C18,39 23,45 28,40 C33,35 32,29 27,33 Z" fill="#C81B54" />
+                                            <path d="M37,33 C46,39 41,45 36,40 C31,35 32,29 37,33 Z" fill="#C81B54" />
+                                            {/* Center */}
+                                            <circle cx="32" cy="26" r="4.5" fill="#FCD34D" />
+                                            <circle cx="32" cy="26" r="2" fill="#fff" />
+                                        </svg>
+                                    </div>
+                                    <span style={{ fontFamily: 'Aref Ruqaa, Georgia, serif', fontSize: '52px', color: '#1E4620', fontWeight: 800, marginTop: '-24px', letterSpacing: '0.05em' }}>fresh flowers</span>
+                                    <div style={{
+                                        marginTop: '12px',
+                                        fontFamily: 'Playfair Display, Georgia, serif',
+                                        fontSize: '17px',
+                                        color: '#7C1A3A',
+                                        fontStyle: 'italic',
+                                        fontWeight: 800,
+                                        whiteSpace: 'nowrap'
+                                    }}>
+                                        Every Flower Tells A Story, Let Us Be A Part Of Yours ♥
+                                    </div>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    {tenantInfo?.logoUrl ? (
+                                        <img src={tenantInfo.logoUrl} alt="Logo" style={{ maxHeight: '60px', maxWidth: '140px', marginBottom: '6px' }} />
+                                    ) : (
+                                        <span style={{ fontSize: '36px', marginBottom: '6px' }}>🌸</span>
+                                    )}
+                                    <h1 style={{ fontFamily: 'Cinzel, Georgia, serif', color: '#7C1A3A', fontSize: '30px', fontWeight: 900, margin: 0, letterSpacing: '-0.02em', lineHeight: '1.1' }}>
+                                        {tenantInfo?.name || 'SVM Flowers'}
+                                    </h1>
+                                    <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#D4AF37', fontStyle: 'italic', fontWeight: 600, marginTop: '4px' }}>
+                                        {tenantInfo?.motto || 'Freshness You Can Trust, Quality You Deserve'}
+                                    </span>
+                                    <div style={{
+                                        marginTop: '12px',
+                                        fontFamily: 'Playfair Display, Georgia, serif',
+                                        fontSize: '14px',
+                                        color: '#7C1A3A',
+                                        fontStyle: 'italic',
+                                        fontWeight: 800,
+                                        whiteSpace: 'nowrap'
+                                    }}>
+                                        ♥ Every Flower Tells A Story, Let Us Be A Part Of Yours ♥
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Right Column: Premium Round Badge (Symmetric to Left Column) */}
+                        <div style={{ width: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingRight: '45px', boxSizing: 'border-box' }}>
+                            {/* Premium Round Badge */}
+                            <div style={{
+                                marginTop: '12px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                width: '240px',
+                                boxSizing: 'border-box'
+                            }}>
+                                <div style={{
+                                    width: '76px',
+                                    height: '76px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxSizing: 'border-box',
+                                    boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
+                                    overflow: 'hidden'
+                                }}>
+                                    <svg width="76" height="76" viewBox="0 0 100 100" style={{ display: 'block' }}>
+                                        <defs>
+                                            <path id="topTextPath" d="M 18 50 A 32 32 0 0 1 82 50" fill="none" />
+                                            <path id="bottomTextPath" d="M 82 50 A 32 32 0 0 1 18 50" fill="none" />
+                                        </defs>
+                                        <circle cx="50" cy="50" r="48" fill="#1E4620" stroke="#D4AF37" strokeWidth="1.8" />
+                                        <circle cx="50" cy="50" r="44" fill="none" stroke="#D4AF37" strokeWidth="0.8" strokeDasharray="2, 2" />
+                                        <circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" strokeWidth="1.2" />
+                                        <circle cx="50" cy="50" r="23" fill="#173518" stroke="#D4AF37" strokeWidth="0.8" />
+                                        
+                                        <text fontStyle="normal" fontWeight="800" fontSize="7" fill="#D4AF37" letterSpacing="0.6">
+                                            <textPath href="#topTextPath" startOffset="50%" textAnchor="middle">
+                                                FRESH FLOWERS
+                                            </textPath>
+                                        </text>
+                                        
+                                        <text fontStyle="normal" fontWeight="800" fontSize="7" fill="#D4AF37" letterSpacing="0.6">
+                                            <textPath href="#bottomTextPath" startOffset="50%" textAnchor="middle">
+                                                PREMIUM QUALITY
+                                            </textPath>
+                                        </text>
+                                        
+                                        <g fill="#D4AF37" transform="translate(50, 50) scale(0.6)">
+                                            {/* Center circle */}
+                                            <circle cx="0" cy="0" r="4.5" fill="#FCF9F2" stroke="#D4AF37" strokeWidth="1" />
+                                            {/* Petals */}
+                                            <path d="M 0,-5 C -4,-12 4,-12 0,-5 Z" />
+                                            <path d="M 5,0 C 12,-4 12,4 5,0 Z" />
+                                            <path d="M -5,0 C -12,-4 -12,4 -5,0 Z" />
+                                            <path d="M 3.5,3.5 C 9.5,9.5 9.5,1.5 3.5,3.5 Z" />
+                                            <path d="M -3.5,3.5 C -9.5,9.5 -9.5,1.5 -3.5,3.5 Z" />
+                                            <path d="M 3.5,-3.5 C 9.5,-9.5 9.5,-1.5 3.5,-3.5 Z" />
+                                            <path d="M -3.5,-3.5 C -9.5,-9.5 -9.5,-1.5 -3.5,-3.5 Z" />
+                                        </g>
                                     </svg>
                                 </div>
-                                <span style={{ fontFamily: 'Aref Ruqaa, Georgia, serif', fontSize: '38px', color: '#1E4620', fontWeight: 800, marginTop: '-18px', letterSpacing: '0.05em' }}>fresh flowers</span>
                             </div>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                {tenantInfo?.logoUrl ? (
-                                    <img src={tenantInfo.logoUrl} alt="Logo" style={{ maxHeight: '60px', maxWidth: '140px', marginBottom: '6px' }} />
-                                ) : (
-                                    <span style={{ fontSize: '36px', marginBottom: '6px' }}>🌸</span>
-                                )}
-                                <h1 style={{ fontFamily: 'Cinzel, Georgia, serif', color: '#7C1A3A', fontSize: '30px', fontWeight: 900, margin: 0, letterSpacing: '-0.02em', lineHeight: '1.1' }}>
-                                    {tenantInfo?.name || 'SVM Flowers'}
-                                </h1>
-                                <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#D4AF37', fontStyle: 'italic', fontWeight: 600, marginTop: '4px' }}>
-                                    {tenantInfo?.motto || 'Freshness You Can Trust, Quality You Deserve'}
-                                </span>
-                                <div style={{
-                                    marginTop: '12px',
-                                    fontFamily: 'Playfair Display, Georgia, serif',
-                                    fontSize: '14px',
-                                    color: '#7C1A3A',
-                                    fontStyle: 'italic',
-                                    fontWeight: 800,
-                                    whiteSpace: 'nowrap'
-                                }}>
-                                    ♥ Every Flower Tells A Story, Let Us Be A Part Of Yours ♥
-                                </div>
-                            </div>
-                        )}
-
-                        {tenantId === 'mma' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '16px', alignItems: 'center' }}>
-                                <div style={{
-                                    border: '1.2px solid #D4AF37',
-                                    borderRadius: '20px',
-                                    padding: '6px 14px',
-                                    textAlign: 'center',
-                                    fontSize: '11px',
-                                    fontWeight: 800,
-                                    color: '#7C1A3A',
-                                    background: '#FFFDF9',
-                                    letterSpacing: '0.03em',
-                                    width: '240px',
-                                    boxSizing: 'border-box'
-                                }}>
-                                    ஆர்டரின் பெயரில் கல்யாண மாலைகள்
-                                </div>
-                                <div style={{
-                                    background: '#7C1A3A',
-                                    border: '1.2px solid #D4AF37',
-                                    borderRadius: '20px',
-                                    padding: '6px 14px',
-                                    textAlign: 'center',
-                                    fontSize: '11px',
-                                    fontWeight: 800,
-                                    color: '#FFFDF9',
-                                    letterSpacing: '0.03em',
-                                    width: '240px',
-                                    boxSizing: 'border-box'
-                                }}>
-                                    குறைந்த விலையில் கிடைக்கும்
-                                </div>
-                                <div style={{
-                                    marginTop: '12px',
-                                    fontFamily: 'Playfair Display, Georgia, serif',
-                                    fontSize: '14px',
-                                    color: '#7C1A3A',
-                                    fontStyle: 'italic',
-                                    fontWeight: 800,
-                                    whiteSpace: 'nowrap'
-                                }}>
-                                    ♥ Every Flower Tells A Story, Let Us Be A Part Of Yours ♥
-                                </div>
-                            </div>
-                        )}
+                        </div>
                     </div>
 
-                    {/* Right Column: Premium Round Badge (Symmetric to Left Column) */}
-                    <div style={{ width: '185px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingRight: '15px', boxSizing: 'border-box' }}>
-                        {/* Premium Round Badge */}
-                        <div style={{
-                            marginTop: '12px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            width: '185px',
-                            boxSizing: 'border-box'
-                        }}>
-                            <div style={{
-                                width: '76px',
-                                height: '76px',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                boxSizing: 'border-box',
-                                boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
-                                overflow: 'hidden'
-                            }}>
-                                <svg width="76" height="76" viewBox="0 0 100 100" style={{ display: 'block' }}>
-                                    <defs>
-                                        <path id="topTextPath" d="M 18 50 A 32 32 0 0 1 82 50" fill="none" />
-                                        <path id="bottomTextPath" d="M 82 50 A 32 32 0 0 1 18 50" fill="none" />
-                                    </defs>
-                                    <circle cx="50" cy="50" r="48" fill="#1E4620" stroke="#D4AF37" strokeWidth="1.8" />
-                                    <circle cx="50" cy="50" r="44" fill="none" stroke="#D4AF37" strokeWidth="0.8" strokeDasharray="2, 2" />
-                                    <circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" strokeWidth="1.2" />
-                                    <circle cx="50" cy="50" r="23" fill="#173518" stroke="#D4AF37" strokeWidth="0.8" />
-                                    
-                                    <text fontStyle="normal" fontWeight="800" fontSize="7" fill="#D4AF37" letterSpacing="0.6">
-                                        <textPath href="#topTextPath" startOffset="50%" textAnchor="middle">
-                                            FRESH FLOWERS
-                                        </textPath>
-                                    </text>
-                                    
-                                    <text fontStyle="normal" fontWeight="800" fontSize="7" fill="#D4AF37" letterSpacing="0.6">
-                                        <textPath href="#bottomTextPath" startOffset="50%" textAnchor="middle">
-                                            PREMIUM QUALITY
-                                        </textPath>
-                                    </text>
-                                    
-                                    <g fill="#D4AF37" transform="translate(50, 50) scale(0.6)">
-                                        {/* Center circle */}
-                                        <circle cx="0" cy="0" r="4.5" fill="#FCF9F2" stroke="#D4AF37" strokeWidth="1" />
-                                        {/* Petals */}
-                                        <path d="M 0,-5 C -4,-12 4,-12 0,-5 Z" />
-                                        <path d="M 5,0 C 12,-4 12,4 5,0 Z" />
-                                        <path d="M -5,0 C -12,-4 -12,4 -5,0 Z" />
-                                        <path d="M 3.5,3.5 C 9.5,9.5 9.5,1.5 3.5,3.5 Z" />
-                                        <path d="M -3.5,3.5 C -9.5,9.5 -9.5,1.5 -3.5,3.5 Z" />
-                                        <path d="M 3.5,-3.5 C 9.5,-9.5 9.5,-1.5 3.5,-3.5 Z" />
-                                        <path d="M -3.5,-3.5 C -9.5,-9.5 -9.5,-1.5 -3.5,-3.5 Z" />
-                                    </g>
-                                </svg>
-                            </div>
-                        </div>
-                        {/* Kattu Pookal Garland in Right Column (Symmetric to Left Column garland) */}
-                        <div style={{ display: 'flex', justifyContent: 'center', width: '185px', marginTop: '15px' }}>
-                            <img src="/images/jasmine_garland.png" alt="Kattu Pookal" style={{ height: '175px', objectFit: 'contain' }} />
-                        </div>
+                    {/* Bottom Garland & Flowers Row (Symmetric and continuous sequence) */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '16px',
+                        width: '100%',
+                        marginTop: '25px',
+                        padding: '0 45px 0 15px',
+                        boxSizing: 'border-box'
+                    }}>
+                        <img src="/images/flower_garland.png" alt="Garland" style={{ height: '145px', objectFit: 'contain', marginRight: '-25px', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.08)' }} />
+                        <img src="/images/jasmine_garland.png" alt="Kattu Pookal" style={{ height: '125px', objectFit: 'contain', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.08)' }} />
+                        <img src="/images/rose_petals.png" alt="Rose Petals" style={{ height: '95px', width: '95px', objectFit: 'contain', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.08)' }} />
+                        <img src="/images/malli.png" alt="Malli" style={{ height: '95px', width: '95px', objectFit: 'contain', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.08)' }} />
+                        <img src="/images/mullai.png" alt="Mullai" style={{ height: '95px', width: '95px', objectFit: 'contain', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.08)' }} />
+                        <img src="/images/sammanki.png" alt="Sammanki" style={{ height: '95px', width: '95px', objectFit: 'contain', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.08)' }} />
+                        <img src="/images/marigold_flower.png" alt="Samanthi" style={{ height: '95px', width: '95px', objectFit: 'contain', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.08)' }} />
                     </div>
                 </div>
 
@@ -656,7 +674,8 @@ const InvoiceView = () => {
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
-                        boxSizing: 'border-box'
+                        boxSizing: 'border-box',
+                        minHeight: '140px'
                     }}>
                         {/* Top-left flag/tab */}
                         <div style={{
@@ -675,10 +694,23 @@ const InvoiceView = () => {
                             {activeText.billTo} :
                         </div>
 
+
+
                         {buyer && (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '10px' }}>
+                            <div style={{ zIndex: 1, position: 'relative', width: '100%', marginTop: '10px' }}>
                                 <div style={{ textAlign: 'left' }}>
-                                    <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: '20px', fontWeight: 800, color: '#7C1A3A', margin: '0 0 10px' }}>
+                                    <h3 style={{
+                                        fontFamily: 'Playfair Display, Georgia, serif',
+                                        fontStyle: 'normal',
+                                        fontSize: (lang === 'ta' ? (buyer.nameTa || buyer.name) : buyer.name).length > 20
+                                            ? '16px'
+                                            : (lang === 'ta' ? (buyer.nameTa || buyer.name) : buyer.name).length > 12
+                                                ? '20.5px'
+                                                : '25px',
+                                        fontWeight: 900,
+                                        color: '#7C1A3A',
+                                        margin: '0 0 10px'
+                                    }}>
                                         {lang === 'ta' ? (buyer.nameTa || buyer.name) : buyer.name}
                                     </h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -697,7 +729,7 @@ const InvoiceView = () => {
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '50%', background: '#7C1A3A', color: '#fff', flexShrink: 0 }}>
                                                     <Phone size={10} />
                                                 </div>
-                                                <span style={{ fontSize: '11.5px', color: '#6E5D61', fontWeight: 600 }}>
+                                                <span style={{ fontSize: '11.5px', color: '#6E5D61', fontWeight: 600, whiteSpace: 'nowrap' }}>
                                                     +91 {buyer.contact}
                                                 </span>
                                             </div>
@@ -714,17 +746,16 @@ const InvoiceView = () => {
                                         )}
                                     </div>
                                 </div>
-                                <img src="/images/flower_bouquet.png" alt="Bouquet" style={{ width: '100px', height: '100px', objectFit: 'contain', marginLeft: '10px' }} />
                             </div>
                         )}
                     </div>
 
                     {/* Dues summary badges */}
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        {/* Opening Balance Card */}
                         <div style={{
-                            width: '100px',
-                            height: '100px',
-                            borderRadius: '50%',
+                            minWidth: '135px',
+                            borderRadius: '10px',
                             border: '1.5px solid #D4AF37',
                             background: '#FFFDF9',
                             display: 'flex',
@@ -733,31 +764,32 @@ const InvoiceView = () => {
                             justifyContent: 'center',
                             boxShadow: '0 4px 10px rgba(124, 26, 58, 0.02)',
                             boxSizing: 'border-box',
-                            padding: '8px'
+                            padding: '12px 14px'
                         }}>
                             <span style={{ 
-                                fontSize: '6.5px', 
+                                fontSize: '11px', 
                                 fontWeight: 800, 
                                 color: '#FFFDF9', 
                                 background: '#7C1A3A',
-                                padding: '2px 6px',
-                                borderRadius: '10px',
+                                padding: '3px 8px',
+                                borderRadius: '6px',
                                 textTransform: 'uppercase', 
                                 letterSpacing: '0.04em', 
                                 textAlign: 'center',
                                 display: 'inline-block',
-                                marginBottom: '6px'
+                                marginBottom: '8px'
                             }}>
                                 {activeText.openingBal}
                             </span>
-                            <span style={{ fontSize: '12px', fontWeight: 800, color: '#2C1E21' }}>
+                            <span style={{ fontSize: '15px', fontWeight: 800, color: '#2C1E21' }}>
                                 {fmt(financials.openingBalance)}
                             </span>
                         </div>
+
+                        {/* Today's Sales Card */}
                         <div style={{
-                            width: '110px',
-                            height: '110px',
-                            borderRadius: '50%',
+                            minWidth: '150px',
+                            borderRadius: '10px',
                             border: '2px solid #7C1A3A',
                             background: '#7C1A3A',
                             color: '#fff',
@@ -768,31 +800,32 @@ const InvoiceView = () => {
                             boxShadow: '0 6px 15px rgba(124, 26, 58, 0.15)',
                             transform: 'scale(1.05)',
                             boxSizing: 'border-box',
-                            padding: '8px'
+                            padding: '14px 16px'
                         }}>
                             <span style={{ 
-                                fontSize: '6.5px', 
+                                fontSize: '11px', 
                                 fontWeight: 800, 
                                 color: '#7C1A3A', 
                                 background: '#FFFDF9',
-                                padding: '2px 6px',
-                                borderRadius: '10px',
+                                padding: '3px 8px',
+                                borderRadius: '6px',
                                 textTransform: 'uppercase', 
                                 letterSpacing: '0.04em', 
                                 textAlign: 'center',
                                 display: 'inline-block',
-                                marginBottom: '6px'
+                                marginBottom: '8px'
                             }}>
                                 {activeText.todaysSales}
                             </span>
-                            <span style={{ fontSize: '13px', fontWeight: 900, color: '#fff' }}>
+                            <span style={{ fontSize: '16px', fontWeight: 900, color: '#fff' }}>
                                 {fmt(financials.todayTotal)}
                             </span>
                         </div>
+
+                        {/* Balance Dues Card */}
                         <div style={{
-                            width: '100px',
-                            height: '100px',
-                            borderRadius: '50%',
+                            minWidth: '135px',
+                            borderRadius: '10px',
                             border: '1.5px solid #D4AF37',
                             background: '#FCF9F2',
                             display: 'flex',
@@ -801,41 +834,40 @@ const InvoiceView = () => {
                             justifyContent: 'center',
                             boxShadow: '0 4px 10px rgba(124, 26, 58, 0.02)',
                             boxSizing: 'border-box',
-                            padding: '8px'
+                            padding: '12px 14px'
                         }}>
                             <span style={{ 
-                                fontSize: '6.5px', 
+                                fontSize: '11px', 
                                 fontWeight: 800, 
                                 color: '#FFFDF9', 
                                 background: '#7C1A3A',
-                                padding: '2px 6px',
-                                borderRadius: '10px',
+                                padding: '3px 8px',
+                                borderRadius: '6px',
                                 textTransform: 'uppercase', 
                                 letterSpacing: '0.04em', 
                                 textAlign: 'center',
                                 display: 'inline-block',
-                                marginBottom: '6px'
+                                marginBottom: '8px'
                             }}>
                                 {activeText.balDues}
                             </span>
-                            <span style={{ fontSize: '12px', fontWeight: 800, color: '#7C1A3A' }}>
+                            <span style={{ fontSize: '15px', fontWeight: 800, color: '#7C1A3A' }}>
                                 {fmt(financials.balanceDues)}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                {/* ── PRODUCTS TABLE ── */}
                 <div style={{ margin: '24px 0', border: '1px solid #D4AF37', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.01)' }}>
-                    <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '12px', fontFamily: 'Montserrat, sans-serif' }}>
+                    <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: '18px', fontFamily: 'Montserrat, sans-serif' }}>
                         <thead>
                             <tr style={{ background: '#7C1A3A', color: '#fff', borderBottom: '2px solid #D4AF37' }}>
-                                <th style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 900, fontSize: '13.5px', width: '8%', whiteSpace: 'nowrap' }}>{activeText.slNo}</th>
-                                {from !== to && <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 900, fontSize: '13.5px', width: '14%', whiteSpace: 'nowrap' }}>{activeText.date}</th>}
-                                <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 900, fontSize: '13.5px', width: '32%', whiteSpace: 'nowrap' }}>{activeText.itemDesc}</th>
-                                <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 900, fontSize: '13.5px', width: from !== to ? '14%' : '16%', whiteSpace: 'nowrap' }}>{activeText.qty}</th>
-                                <th style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 900, fontSize: '13.5px', width: from !== to ? '14%' : '20%', whiteSpace: 'nowrap' }}>{activeText.rate}</th>
-                                <th style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 900, fontSize: '13.5px', width: from !== to ? '18%' : '24%', whiteSpace: 'nowrap' }}>{activeText.amount}</th>
+                                <th style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 950, fontSize: '19px', width: '8%', whiteSpace: 'nowrap' }}>{activeText.slNo}</th>
+                                {from !== to && <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 950, fontSize: '19px', width: '14%', whiteSpace: 'nowrap' }}>{activeText.date}</th>}
+                                <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 950, fontSize: '19px', width: '32%', whiteSpace: 'nowrap' }}>{activeText.itemDesc}</th>
+                                <th style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 950, fontSize: '19px', width: from !== to ? '14%' : '16%', whiteSpace: 'nowrap' }}>{activeText.qty}</th>
+                                <th style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 950, fontSize: '19px', width: from !== to ? '14%' : '20%', whiteSpace: 'nowrap' }}>{activeText.rate}</th>
+                                <th style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 950, fontSize: '19px', width: from !== to ? '18%' : '24%', whiteSpace: 'nowrap' }}>{activeText.amount}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -850,33 +882,32 @@ const InvoiceView = () => {
                                     <tr key={idx} style={{
                                         borderBottom: '1px solid #F4E8C1',
                                         background: idx % 2 === 0 ? '#FFFDF9' : '#FCF9F2',
-                                        fontWeight: 600,
                                         color: '#2C1E21'
                                     }}>
-                                        <td style={{ padding: '10px', textAlign: 'center', color: '#6E5D61', width: '8%' }}>{idx + 1}</td>
-                                        {from !== to && <td style={{ padding: '10px', textAlign: 'left', fontSize: '11px', width: '14%' }}>{item.date ? displayDate(item.date) : ''}</td>}
-                                        <td style={{ padding: '8px 10px', textAlign: 'left', color: '#7C1A3A', fontWeight: 700, width: '32%' }}>
+                                        <td style={{ padding: '10px', textAlign: 'center', color: '#6E5D61', width: '8%', fontSize: '18.5px', fontWeight: 800 }}>{idx + 1}</td>
+                                        {from !== to && <td style={{ padding: '10px', textAlign: 'left', fontSize: '17px', fontWeight: 700, width: '14%' }}>{item.date ? displayDate(item.date) : ''}</td>}
+                                        <td style={{ padding: '8px 10px', textAlign: 'left', color: '#7C1A3A', fontWeight: 900, width: '32%', fontSize: '19px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <img src={getFlowerImage(item.flowerType)} alt="" style={{ width: '30px', height: '30px', borderRadius: '4px', objectFit: 'cover', border: '1.5px solid #F4E8C1', background: '#fff' }} />
                                                 <span>{lang === 'ta' ? (item.flowerTypeTa || item.flowerType) : item.flowerType}</span>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '10px', textAlign: 'left', width: from !== to ? '14%' : '16%' }}>{Number(item.quantity).toFixed(3)}</td>
-                                        <td style={{ padding: '10px', textAlign: 'right', width: from !== to ? '14%' : '20%' }}>{fmt(item.price)}</td>
-                                        <td style={{ padding: '10px', textAlign: 'right', fontWeight: 800, width: from !== to ? '18%' : '24%' }}>{fmt(item.total)}</td>
+                                        <td style={{ padding: '10px', textAlign: 'left', width: from !== to ? '14%' : '16%', fontWeight: 900, fontSize: '19px' }}>{Number(item.quantity).toFixed(2)}</td>
+                                        <td style={{ padding: '10px', textAlign: 'right', width: from !== to ? '14%' : '20%', fontWeight: 900, fontSize: '19px' }}>{fmt(item.price)}</td>
+                                        <td style={{ padding: '10px', textAlign: 'right', fontWeight: 950, fontSize: '20px', width: from !== to ? '18%' : '24%' }}>{fmt(item.total)}</td>
                                     </tr>
                                 ))
                             )}
 
                             {/* Totals Summary Row inside table */}
                             {invoiceItems.length > 0 && (
-                                <tr style={{ background: '#FCF9F2', borderTop: '2.5px double #D4AF37', fontWeight: 800, color: '#7C1A3A', fontSize: '12px' }}>
+                                <tr style={{ background: '#FCF9F2', borderTop: '2.5px double #D4AF37', fontWeight: 950, color: '#7C1A3A', fontSize: '20px' }}>
                                     <td colSpan={from !== to ? 3 : 2} style={{ padding: '12px 10px', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                         Total
                                     </td>
-                                    <td style={{ padding: '12px 10px', textAlign: 'left', width: from !== to ? '14%' : '16%' }}>{financials.totalKg.toFixed(3)} Kg</td>
+                                    <td style={{ padding: '12px 10px', textAlign: 'left', width: from !== to ? '14%' : '16%', fontWeight: 950, whiteSpace: 'nowrap' }}>{financials.totalKg.toFixed(2)} Kg</td>
                                     <td style={{ padding: '12px 10px', width: from !== to ? '14%' : '20%' }} />
-                                    <td style={{ padding: '12px 10px', textAlign: 'right', fontSize: '13px', fontWeight: 900, width: from !== to ? '18%' : '24%' }}>{fmt(financials.todayTotal)}</td>
+                                    <td style={{ padding: '12px 10px', textAlign: 'right', fontSize: '21px', fontWeight: 950, width: from !== to ? '18%' : '24%' }}>{fmt(financials.todayTotal)}</td>
                                 </tr>
                             )}
                         </tbody>
@@ -885,35 +916,104 @@ const InvoiceView = () => {
 
                 {/* ── LOWER SECTION: DUES STATEMENT & PAYMENT ── */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '30px', margin: '30px 0 10px' }}>
-                    {/* Left: Tamil Info Box instead of Notes & Special Offer */}
+                    {/* Left: New Decorative Bordered Promotional Box */}
                     <div style={{
+                        position: 'relative',
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: '20px',
-                        padding: '20px 24px',
+                        justifyContent: 'center',
+                        padding: '24px 30px',
                         background: '#FFFDF9',
                         border: '2px solid #D4AF37',
                         borderRadius: '16px',
                         boxShadow: '0 4px 12px rgba(124, 26, 58, 0.02)',
                         boxSizing: 'border-box',
-                        minHeight: '135px'
+                        minHeight: '135px',
+                        overflow: 'hidden'
                     }}>
-                        <img src="/images/flower_corner_top.png" alt="" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
-                        <span style={{
-                            flex: 1,
-                            fontFamily: 'Playfair Display, Georgia, serif',
-                            fontSize: '18px',
-                            fontWeight: 800,
-                            color: '#7C1A3A',
-                            lineHeight: '1.6',
-                            letterSpacing: '0.02em',
-                            display: 'block',
-                            textAlign: 'center'
+                        {/* Decorative thin inner border */}
+                        <div style={{
+                            position: 'absolute',
+                            inset: '6px',
+                            border: '1px dashed #D4AF37',
+                            borderRadius: '10px',
+                            pointerEvents: 'none'
+                        }} />
+
+                        {/* Subtle Floral Corner Decorations */}
+                        <img src="/images/flower_corner_top.png" alt="" style={{ position: 'absolute', top: '8px', left: '8px', width: '32px', height: '32px', objectFit: 'contain', opacity: 0.8 }} />
+                        <img src="/images/flower_corner_top.png" alt="" style={{ position: 'absolute', top: '8px', right: '8px', width: '32px', height: '32px', objectFit: 'contain', transform: 'scaleX(-1)', opacity: 0.8 }} />
+                        <img src="/images/flower_corner_top.png" alt="" style={{ position: 'absolute', bottom: '8px', left: '8px', width: '32px', height: '32px', objectFit: 'contain', transform: 'scaleY(-1)', opacity: 0.8 }} />
+                        <img src="/images/flower_corner_top.png" alt="" style={{ position: 'absolute', bottom: '8px', right: '8px', width: '32px', height: '32px', objectFit: 'contain', transform: 'scale(-1)', opacity: 0.8 }} />
+
+                        {/* Header: MMA & Fresh Flowers */}
+                        <div style={{ textAlign: 'center', margin: '10px 0 18px', zIndex: 1 }}>
+                            <h4 style={{
+                                fontFamily: 'Playfair Display, Georgia, serif',
+                                fontSize: '32px',
+                                fontWeight: 950,
+                                color: '#7C1A3A',
+                                margin: '0',
+                                letterSpacing: '0.05em',
+                                lineHeight: '1.1'
+                            }}>
+                                MMA
+                            </h4>
+                            <span style={{
+                                fontFamily: 'Playfair Display, Georgia, serif',
+                                fontSize: '18.5px',
+                                fontWeight: 900,
+                                color: '#7C1A3A',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.08em',
+                                display: 'block',
+                                marginTop: '4px'
+                            }}>
+                                Fresh Flowers
+                            </span>
+                        </div>
+
+                        {/* Promotional Bullet Points */}
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '18px',
+                            textAlign: 'left',
+                            zIndex: 1,
+                            padding: '0 12px 10px'
                         }}>
-                            எங்களிடம் கல்யாண மாலையும் கட்டுப் பூக்களும் கிடைக்கும்.
-                        </span>
-                        <img src="/images/flower_corner_top.png" alt="" style={{ width: '45px', height: '45px', objectFit: 'contain', transform: 'scaleX(-1)' }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span style={{ fontSize: '22px', flexShrink: 0 }}>🌸</span>
+                                <span style={{
+                                    fontFamily: lang === 'ta' ? 'inherit' : 'Playfair Display, Georgia, serif',
+                                    fontSize: '20.5px',
+                                    fontWeight: 950,
+                                    color: '#7C1A3A',
+                                    fontStyle: 'normal',
+                                    lineHeight: '1.4'
+                                }}>
+                                    {lang === 'ta'
+                                        ? 'ஆர்டரின் பெயரில் கல்யாண மாலைகள் குறைந்த விலையில் கிடைக்கும்.'
+                                        : 'Order-in peyaril Kalyana maalaigal kuraindha vilayil kidaikum.'}
+                                </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span style={{ fontSize: '22px', flexShrink: 0 }}>🌸</span>
+                                <span style={{
+                                    fontFamily: lang === 'ta' ? 'inherit' : 'Playfair Display, Georgia, serif',
+                                    fontSize: '20.5px',
+                                    fontWeight: 950,
+                                    color: '#7C1A3A',
+                                    fontStyle: 'normal',
+                                    lineHeight: '1.4'
+                                }}>
+                                    {lang === 'ta'
+                                        ? 'எங்களிடம் கட்டுப் பூக்களும் கட்டித் தரப்படும்.'
+                                        : 'Engalidam kattu pookalum katti tharapadum.'}
+                                </span>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Right: Calculations Dues Summary Block */}
@@ -925,29 +1025,83 @@ const InvoiceView = () => {
                             overflow: 'hidden',
                             boxShadow: '0 4px 10px rgba(0,0,0,0.01)'
                         }}>
-                            <div style={{ background: '#7C1A3A', color: '#fff', padding: '12px 15px', textAlign: 'center', fontSize: '13px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                            <div style={{ background: '#7C1A3A', color: '#fff', padding: '12px 15px', textAlign: 'center', fontSize: '14.5px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                                 {activeText.duesSummary}
                             </div>
-                            <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '11px', fontSize: '13px', fontWeight: 700, color: '#2C1E21', textAlign: 'left' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ color: '#2C1E21', fontWeight: 800 }}>{activeText.openingBal}:</span>
-                                    <span style={{ fontWeight: 800 }}>{fmt(financials.openingBalance)}</span>
+                            <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                                {/* Opening Dues */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    border: '1.2px solid #F4E8C1',
+                                    borderRadius: '8px',
+                                    padding: '8px 12px',
+                                    background: '#FFFDF9'
+                                }}>
+                                    <span style={{ color: '#2C1E21', fontWeight: 800, fontSize: '13.5px' }}>{activeText.openingBal}:</span>
+                                    <span style={{ fontWeight: 800, fontSize: '14px', color: '#2C1E21' }}>{fmt(financials.openingBalance)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #F4E8C1', paddingBottom: '8px' }}>
-                                    <span style={{ color: '#2C1E21', fontWeight: 800 }}>{activeText.todaysSales}:</span>
-                                    <span style={{ color: '#b91c1c', fontWeight: 900 }}>+ {fmt(financials.todayTotal)}</span>
+
+                                {/* Today's Sales */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    border: '1.2px solid #F4E8C1',
+                                    borderRadius: '8px',
+                                    padding: '8px 12px',
+                                    background: '#FFFDF9'
+                                }}>
+                                    <span style={{ color: '#2C1E21', fontWeight: 800, fontSize: '13.5px' }}>{activeText.todaysSales}:</span>
+                                    <span style={{ color: '#b91c1c', fontWeight: 900, fontSize: '14.5px' }}>+ {fmt(financials.todayTotal)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ color: '#2C1E21', fontWeight: 800 }}>{activeText.amtRec}:</span>
-                                    <span style={{ color: '#16a34a', fontWeight: 900 }}>- {fmt(financials.cashRec)}</span>
+
+                                {/* Amount Received */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    border: '1.2px solid #F4E8C1',
+                                    borderRadius: '8px',
+                                    padding: '8px 12px',
+                                    background: '#FFFDF9'
+                                }}>
+                                    <span style={{ color: '#2C1E21', fontWeight: 800, fontSize: '13.5px' }}>{activeText.amtRec}:</span>
+                                    <span style={{ color: '#16a34a', fontWeight: 900, fontSize: '14.5px' }}>- {fmt(financials.cashRec)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1.5px solid #D4AF37', paddingBottom: '10px' }}>
-                                    <span style={{ color: '#2C1E21', fontWeight: 800 }}>{activeText.cashLess}:</span>
-                                    <span style={{ color: '#16a34a', fontWeight: 900 }}>- {fmt(financials.cashLess)}</span>
+
+                                {/* Cash Discount */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    border: '1.2px solid #F4E8C1',
+                                    borderRadius: '8px',
+                                    padding: '8px 12px',
+                                    background: '#FFFDF9'
+                                }}>
+                                    <span style={{ color: '#2C1E21', fontWeight: 800, fontSize: '13.5px' }}>{activeText.cashLess}:</span>
+                                    <span style={{ color: '#16a34a', fontWeight: 900, fontSize: '14.5px' }}>- {fmt(financials.cashLess)}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', fontSize: '15.5px', fontWeight: 950, color: '#7C1A3A' }}>
-                                    <span>{activeText.balDues}:</span>
-                                    <span>{fmt(financials.balanceDues)}</span>
+
+                                {/* Balance Amount */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    border: '2px solid #7C1A3A',
+                                    borderRadius: '8px',
+                                    padding: '14px 18px',
+                                    background: '#7C1A3A',
+                                    boxShadow: '0 4px 15px rgba(124, 26, 58, 0.25)'
+                                }}>
+                                    <span style={{ color: '#FFFFFF', fontWeight: 900, fontSize: '18px' }}>
+                                        {lang === 'ta' ? 'மீதி பாக்கி' : 'Balance Amount'}:
+                                    </span>
+                                    <span style={{ color: '#FCD34D', fontWeight: 950, fontSize: '24px' }}>
+                                        {fmt(financials.balanceDues)}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -982,7 +1136,7 @@ const InvoiceView = () => {
                     {/* Right: Signature Line */}
                     {/* Right: Signature Line (Simplified as requested) */}
                     <div style={{ textAlign: 'right', minWidth: '180px', marginRight: '35px', display: 'flex', alignItems: 'center' }}>
-                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#7C1A3A', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '17px', fontWeight: 900, color: '#7C1A3A', whiteSpace: 'nowrap' }}>
                             For, {tenantId === 'mma' ? 'MMA Fresh Flowers' : `${tenantInfo?.name || ''} ${tenantInfo?.type || ''}`}
                         </span>
                     </div>
@@ -1086,6 +1240,14 @@ const InvoiceView = () => {
             {/* Print stylesheet */}
             <style>{`
                 @media print {
+                    @page {
+                        size: A4 portrait;
+                        margin: 10mm 12mm !important;
+                    }
+                    * {
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
                     .no-print {
                         display: none !important;
                     }
@@ -1096,14 +1258,13 @@ const InvoiceView = () => {
                     }
                     .invoice-container {
                         margin: 0 auto !important;
-                        border: none !important;
+                        border: 2px solid #D4AF37 !important;
                         box-shadow: none !important;
                         width: 100% !important;
                         max-width: 100% !important;
-                        padding: 20px !important;
+                        padding: 40px !important;
                         background: #FFFDF9 !important;
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
+                        zoom: 65% !important;
                     }
                 }
             `}</style>

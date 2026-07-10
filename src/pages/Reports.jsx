@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
-import { Search, MessageCircle, BarChart2, X, User, ChevronRight, Download } from 'lucide-react';
+import { Search, MessageCircle, BarChart2, X, User, ChevronRight, Download, Printer } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { subscribeToCollection, db } from '../utils/storage';
 import { doc, getDoc } from 'firebase/firestore';
@@ -50,6 +50,7 @@ const Reports = () => {
     const [isDownloading, setIsDownloading]  = useState(false);
     const [sharingRowId, setSharingRowId]    = useState(null);
     const [downloadingRowId, setDownloadingRowId] = useState(null);
+    const [printingRowId, setPrintingRowId] = useState(null);
     const [mainTableSelectedIndex, setMainTableSelectedIndex] = useState(-1);
     const mainTableRowRefs = React.useRef([]);
 
@@ -316,7 +317,7 @@ const Reports = () => {
                                         <tr>
                                             <td align="center" style="font-weight: 700;">${showDate ? displayDate(item.date) : ''}</td>
                                             <td>${item.desc}</td>
-                                            <td align="center">${item.type === 'SALE' ? parseFloat(item.qty).toFixed(3) : '0.000'}</td>
+                                            <td align="center">${item.type === 'SALE' ? parseFloat(item.qty).toFixed(2) : '0.00'}</td>
                                             <td align="center">${item.type === 'SALE' ? item.price : '0'}</td>
                                             <td align="right" style="font-weight: 700; color: ${item.total > 0 ? '#b91c1c' : '#000'}">${item.total > 0 ? item.total.toFixed(0) : '0'}</td>
                                             <td align="right" style="font-weight: 700; color: #16a34a">${item.type === 'PAY' ? item.credit.toFixed(0) : '0'}</td>
@@ -346,8 +347,12 @@ const Reports = () => {
         printWindow.document.close();
     };
 
-    const handleDownloadLedgerPDF = async (buyerRow) => {
-        setDownloadingRowId(buyerRow.id);
+    const handleDownloadLedgerPDF = async (buyerRow, isPrint = false) => {
+        if (isPrint) {
+            setPrintingRowId(buyerRow.id);
+        } else {
+            setDownloadingRowId(buyerRow.id);
+        }
         const buyer = buyers.find(b => b.id === buyerRow.id) || buyerRow;
         try {
             // 1. Calculate Opening Balance (Backward from current balance)
@@ -390,13 +395,13 @@ const Reports = () => {
                         const foundFlower = products.find(f => f.name?.trim().toLowerCase() === item.flowerType?.trim().toLowerCase());
                         descLocalized = item.flowerTypeTa || foundFlower?.taName || item.flowerType;
                     }
-                    items.push({ dateIso, date: displayDate(dateIso), particulars: descLocalized, weight: parseFloat(item.quantity).toFixed(3), rate: item.price, total: item.total, cashRec: 0, cashLess: 0 });
+                    items.push({ dateIso, date: displayDate(dateIso), particulars: descLocalized, weight: parseFloat(item.quantity).toFixed(2), rate: item.price, total: item.total, cashRec: 0, cashLess: 0 });
                 });
             });
             periodPayments.forEach(p => {
                 const dateIso = p.timestamp ? (typeof p.timestamp === 'string' ? p.timestamp.substring(0, 10) : toDateStr(p.timestamp.toDate ? p.timestamp.toDate() : new Date(p.timestamp))) : '';
-                if (p.amount > 0) items.push({ dateIso, date: displayDate(dateIso), particulars: t('cashRec'), weight: '0.000', rate: 0, total: 0, cashRec: p.amount, cashLess: 0 });
-                if (p.cashLess > 0) items.push({ dateIso, date: displayDate(dateIso), particulars: t('cashLess'), weight: '0.000', rate: 0, total: 0, cashRec: 0, cashLess: p.cashLess });
+                if (p.amount > 0) items.push({ dateIso, date: displayDate(dateIso), particulars: t('cashRec'), weight: '0.00', rate: 0, total: 0, cashRec: p.amount, cashLess: 0 });
+                if (p.cashLess > 0) items.push({ dateIso, date: displayDate(dateIso), particulars: t('cashLess'), weight: '0.00', rate: 0, total: 0, cashRec: 0, cashLess: p.cashLess });
             });
             items.sort((a, b) => a.dateIso.localeCompare(b.dateIso));
             
@@ -461,13 +466,19 @@ const Reports = () => {
                 doc.addImage(base64data, 'PNG', 0, 0, pageWidth, pageHeight);
             }
             
-            const fileName = `statement_${buyer.name.replace(/\s+/g, '_')}_${appliedFrom}_to_${appliedTo}.pdf`;
-            doc.save(fileName);
+            if (isPrint) {
+                doc.autoPrint();
+                window.open(doc.output('bloburl'), '_blank');
+            } else {
+                const fileName = `statement_${buyer.name.replace(/\s+/g, '_')}_${appliedFrom}_to_${appliedTo}.pdf`;
+                doc.save(fileName);
+            }
         } catch (err) {
             console.error('Ledger PDF Generation Error:', err);
-            alert('❌ Failed to download PDF: ' + err.message);
+            alert(`❌ Failed to ${isPrint ? 'print' : 'download'} PDF: ` + err.message);
         } finally {
             setDownloadingRowId(null);
+            setPrintingRowId(null);
         }
     };
 
@@ -515,13 +526,13 @@ const Reports = () => {
                         const foundFlower = products.find(f => f.name?.trim().toLowerCase() === item.flowerType?.trim().toLowerCase());
                         descLocalized = item.flowerTypeTa || foundFlower?.taName || item.flowerType;
                     }
-                    items.push({ dateIso, date: displayDate(dateIso), particulars: descLocalized, weight: parseFloat(item.quantity).toFixed(3), rate: item.price, total: item.total, cashRec: 0, cashLess: 0 });
+                    items.push({ dateIso, date: displayDate(dateIso), particulars: descLocalized, weight: parseFloat(item.quantity).toFixed(2), rate: item.price, total: item.total, cashRec: 0, cashLess: 0 });
                 });
             });
             periodPayments.forEach(p => {
                 const dateIso = p.timestamp ? (typeof p.timestamp === 'string' ? p.timestamp.substring(0, 10) : toDateStr(p.timestamp.toDate ? p.timestamp.toDate() : new Date(p.timestamp))) : '';
-                if (p.amount > 0) items.push({ dateIso, date: displayDate(dateIso), particulars: t('cashRec'), weight: '0.000', rate: 0, total: 0, cashRec: p.amount, cashLess: 0 });
-                if (p.cashLess > 0) items.push({ dateIso, date: displayDate(dateIso), particulars: t('cashLess'), weight: '0.000', rate: 0, total: 0, cashRec: 0, cashLess: p.cashLess });
+                if (p.amount > 0) items.push({ dateIso, date: displayDate(dateIso), particulars: t('cashRec'), weight: '0.00', rate: 0, total: 0, cashRec: p.amount, cashLess: 0 });
+                if (p.cashLess > 0) items.push({ dateIso, date: displayDate(dateIso), particulars: t('cashLess'), weight: '0.00', rate: 0, total: 0, cashRec: 0, cashLess: p.cashLess });
             });
             items.sort((a, b) => a.dateIso.localeCompare(b.dateIso));
             
@@ -980,6 +991,29 @@ const Reports = () => {
                                                         : <Download size={14} />
                                                     }
                                                 </button>
+
+                                                <button
+                                                    onClick={() => handleDownloadLedgerPDF(row, true)}
+                                                    disabled={printingRowId === row.id}
+                                                    title="Print PDF Ledger"
+                                                    style={{
+                                                        width: '32px', height: '32px', borderRadius: '8px',
+                                                        border: '1.5px solid ' + (isHighlighted ? 'rgba(255,255,255,0.5)' : '#6366f1'), 
+                                                        background: isHighlighted ? 'rgba(255,255,255,0.1)' : '#fff',
+                                                        color: isHighlighted ? '#fff' : '#6366f1', display: 'inline-flex',
+                                                        alignItems: 'center', justifyContent: 'center',
+                                                        cursor: printingRowId === row.id ? 'not-allowed' : 'pointer',
+                                                        opacity: printingRowId === row.id ? 0.5 : 1,
+                                                        flexShrink: 0,
+                                                    }}
+                                                    onMouseEnter={e => { if (!isHighlighted && printingRowId !== row.id) { e.currentTarget.style.background='#6366f1'; e.currentTarget.style.color='#fff'; }}}
+                                                    onMouseLeave={e => { if (!isHighlighted) { e.currentTarget.style.background='#fff'; e.currentTarget.style.color='#6366f1'; }}}
+                                                >
+                                                    {printingRowId === row.id
+                                                        ? <div style={{ width:'14px', height:'14px', border:'2px solid ' + (isHighlighted ? '#fff' : '#6366f133'), borderTopColor: isHighlighted ? '#fff' : '#6366f1', borderRadius:'50%', animation:'spin 0.7s linear infinite' }} />
+                                                        : <Printer size={14} />
+                                                    }
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -1035,9 +1069,13 @@ const Reports = () => {
                                             : <><Download size={14} /> PDF</>
                                         }
                                     </button>
-                                    <button onClick={handlePrintDetailedReport}
-                                        style={{ padding: '5px 12px', borderRadius: '7px', background: '#1e293b', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                        🖨️ {t('printLedger')}
+                                    <button onClick={() => handleDownloadLedgerPDF(detailBuyer, true)}
+                                        disabled={printingRowId === detailBuyer.id}
+                                        style={{ padding: '5px 12px', borderRadius: '7px', background: '#6366f1', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        {printingRowId === detailBuyer.id
+                                            ? <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                                            : <><Printer size={14} /> {t('printLedger')}</>
+                                        }
                                     </button>
                                 </div>
                             </div>
@@ -1112,7 +1150,7 @@ const Reports = () => {
                                                                 <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                                                     <td style={{ padding: '8px' }}>{displayDate(it.date)}</td>
                                                                     <td style={{ padding: '8px', fontWeight: 600 }}>{it.desc}</td>
-                                                                    <td style={{ padding: '8px', textAlign: 'right' }}>{it.qty > 0 ? parseFloat(it.qty).toFixed(3) : '—'}</td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right' }}>{it.qty > 0 ? parseFloat(it.qty).toFixed(2) : '—'}</td>
                                                                     <td style={{ padding: '8px', textAlign: 'right' }}>{it.price > 0 ? it.price : '—'}</td>
                                                                     <td style={{ padding: '8px', textAlign: 'right', fontWeight: 700, color: it.total > 0 ? '#dc2626' : 'inherit' }}>{it.total > 0 ? fmt(it.total) : '—'}</td>
                                                                     <td style={{ padding: '8px', textAlign: 'right', color: '#16a34a', fontWeight: 700 }}>{it.credit > 0 ? fmt(it.credit) : '—'}</td>

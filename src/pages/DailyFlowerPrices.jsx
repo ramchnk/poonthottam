@@ -540,8 +540,8 @@ const DailyFlowerPrices = () => {
   return (
     <div className="flex flex-col lg:flex-row gap-8 min-h-[80vh] p-1 lg:p-4">
       {/* LEFT COLUMN: Data Entry & Configuration (60% width) */}
-      <div className="w-full lg:w-3/5 bg-white rounded-[28px] border border-slate-100 shadow-xl p-6 flex flex-col">
-        <div>
+      <div className="w-full lg:w-3/5 bg-white rounded-[28px] border border-slate-100 shadow-xl p-6 flex flex-col justify-between">
+        <div className="flex flex-col flex-1 min-h-0">
           {/* Header Panel */}
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5 mb-6">
             <div>
@@ -633,7 +633,7 @@ const DailyFlowerPrices = () => {
               </p>
             </div>
           ) : (
-            <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-[72vh] overflow-y-auto shadow-sm">
+            <div className="border border-slate-100 rounded-2xl overflow-hidden overflow-y-auto shadow-sm flex-1 min-h-[220px] mb-4">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/70 border-b border-slate-100">

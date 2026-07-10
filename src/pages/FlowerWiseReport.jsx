@@ -17,6 +17,13 @@ const toDateStr = (d) => {
     return `${y}-${m}-${dd}`;
 };
 
+const getItemRate = (item) => {
+    const qty = parseFloat(item.quantity || 0);
+    const tot = parseFloat(item.total || item.totalPrice || 0);
+    const rateVal = parseFloat(item.price || item.rate || 0);
+    return rateVal || (qty > 0 ? tot / qty : 0);
+};
+
 const FlowerWiseReport = () => {
     const { lang } = useContext(LangContext);
     const { tenantData } = useTenant();
@@ -87,7 +94,8 @@ const FlowerWiseReport = () => {
                             name,
                             source: lang === 'ta' ? 'விவசாயி' : 'Farmer',
                             quantity: parseFloat(item.quantity || 0),
-                            total: parseFloat(item.total || 0)
+                            total: parseFloat(item.total || 0),
+                            rate: getItemRate(item)
                         });
                     }
                 });
@@ -106,7 +114,8 @@ const FlowerWiseReport = () => {
                             name,
                             source: lang === 'ta' ? 'விற்பனையாளர்' : 'Vendor',
                             quantity: parseFloat(item.quantity || 0),
-                            total: parseFloat(item.total || 0)
+                            total: parseFloat(item.total || 0),
+                            rate: getItemRate(item)
                         });
                     }
                 });
@@ -134,7 +143,8 @@ const FlowerWiseReport = () => {
                             name,
                             buyer,
                             quantity: parseFloat(item.quantity || 0),
-                            total: parseFloat(item.total || item.totalPrice || 0)
+                            total: parseFloat(item.total || item.totalPrice || 0),
+                            rate: getItemRate(item)
                         });
                     }
                 });
@@ -175,7 +185,8 @@ const FlowerWiseReport = () => {
                                 name,
                                 source: lang === 'ta' ? 'விவசாயி' : 'Farmer',
                                 quantity: parseFloat(item.quantity || 0),
-                                total: parseFloat(item.total || 0)
+                                total: parseFloat(item.total || 0),
+                                rate: getItemRate(item)
                             });
                         }
                     });
@@ -193,7 +204,8 @@ const FlowerWiseReport = () => {
                                 name,
                                 source: lang === 'ta' ? 'விற்பனையாளர்' : 'Vendor',
                                 quantity: parseFloat(item.quantity || 0),
-                                total: parseFloat(item.total || 0)
+                                total: parseFloat(item.total || 0),
+                                rate: getItemRate(item)
                             });
                         }
                     });
@@ -216,7 +228,8 @@ const FlowerWiseReport = () => {
                                 name,
                                 buyer,
                                 quantity: parseFloat(item.quantity || 0),
-                                total: parseFloat(item.total || item.totalPrice || 0)
+                                total: parseFloat(item.total || item.totalPrice || 0),
+                                rate: getItemRate(item)
                             });
                         }
                     });
@@ -261,7 +274,7 @@ const FlowerWiseReport = () => {
                         
                         let purchasesRows = '';
                         if (group.purchases.list.length === 0) {
-                            purchasesRows = `<tr><td colspan="5" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">${lang === 'ta' ? 'கொள்முதல் எதுவும் இல்லை' : 'No purchases.'}</td></tr>`;
+                            purchasesRows = `<tr><td colspan="6" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">${lang === 'ta' ? 'கொள்முதல் எதுவும் இல்லை' : 'No purchases.'}</td></tr>`;
                         } else {
                             purchasesRows = group.purchases.list.map((item, idx) => `
                                 <tr>
@@ -269,6 +282,7 @@ const FlowerWiseReport = () => {
                                     <td>${item.name}</td>
                                     <td>${item.source}</td>
                                     <td class="right">${item.quantity.toFixed(2)}</td>
+                                    <td class="right">${fmt(item.rate)}</td>
                                     <td class="right">${fmt(item.total)}</td>
                                 </tr>
                             `).join('');
@@ -276,13 +290,14 @@ const FlowerWiseReport = () => {
 
                         let salesRows = '';
                         if (group.sales.list.length === 0) {
-                            salesRows = `<tr><td colspan="4" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">${lang === 'ta' ? 'விற்பனை எதுவும் இல்லை' : 'No sales.'}</td></tr>`;
+                            salesRows = `<tr><td colspan="5" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">${lang === 'ta' ? 'விற்பனை எதுவும் இல்லை' : 'No sales.'}</td></tr>`;
                         } else {
                             salesRows = group.sales.list.map((item, idx) => `
                                 <tr>
                                     <td>${idx + 1}</td>
                                     <td>${formatNameForPrint(item, lang)}</td>
                                     <td class="right">${item.quantity.toFixed(2)}</td>
+                                    <td class="right">${fmt(item.rate)}</td>
                                     <td class="right">${fmt(item.total)}</td>
                                 </tr>
                             `).join('');
@@ -302,6 +317,7 @@ const FlowerWiseReport = () => {
                                                     <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">Vendor/Farmer</th>
                                                     <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">Source</th>
                                                     <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">KG</th>
+                                                    <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Rate</th>
                                                     <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Amount</th>
                                                 </tr>
                                             </thead>
@@ -319,6 +335,7 @@ const FlowerWiseReport = () => {
                                                     <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">S.No</th>
                                                     <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">Customer</th>
                                                     <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">KG</th>
+                                                    <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Rate</th>
                                                     <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Amount</th>
                                                 </tr>
                                             </thead>
@@ -362,11 +379,12 @@ const FlowerWiseReport = () => {
                         <td>${item.name}</td>
                         <td>${item.source}</td>
                         <td class="right">${item.quantity.toFixed(2)}</td>
+                        <td class="right">${fmt(item.rate)}</td>
                         <td class="right">${fmt(item.total)}</td>
                     </tr>
                 `).join('');
                 if (purchaseData.list.length === 0) {
-                    purchasesRows = `<tr><td colspan="5" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">No records found.</td></tr>`;
+                    purchasesRows = `<tr><td colspan="6" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">No records found.</td></tr>`;
                 }
 
                 let salesRows = salesData.list.map((item, idx) => `
@@ -374,11 +392,12 @@ const FlowerWiseReport = () => {
                         <td>${idx + 1}</td>
                         <td>${formatNameForPrint(item, lang)}</td>
                         <td class="right">${item.quantity.toFixed(2)}</td>
+                        <td class="right">${fmt(item.rate)}</td>
                         <td class="right">${fmt(item.total)}</td>
                     </tr>
                 `).join('');
                 if (salesData.list.length === 0) {
-                    salesRows = `<tr><td colspan="4" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">No records found.</td></tr>`;
+                    salesRows = `<tr><td colspan="5" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">No records found.</td></tr>`;
                 }
 
                 contentHtml = `
@@ -393,6 +412,7 @@ const FlowerWiseReport = () => {
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">Vendor/Farmer</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">Source</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">KG</th>
+                                        <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Rate</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Amount</th>
                                     </tr>
                                 </thead>
@@ -403,6 +423,7 @@ const FlowerWiseReport = () => {
                                     <tr style="font-weight:bold; background:#f8fafc;">
                                         <td colspan="3" style="padding:8px; border-top:1.5px solid #e2e8f0; color:#1e293b;">Total:</td>
                                         <td style="text-align:right; padding:8px; border-top:1.5px solid #e2e8f0; color:#0f172a;">${purchaseData.totalKg.toFixed(2)}</td>
+                                        <td style="border-top:1.5px solid #e2e8f0;"></td>
                                         <td style="text-align:right; padding:8px; border-top:1.5px solid #e2e8f0; color:#ef4444;">${fmt(purchaseData.totalAmount)}</td>
                                     </tr>
                                 </tfoot>
@@ -417,6 +438,7 @@ const FlowerWiseReport = () => {
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">S.No</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">Customer</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">KG</th>
+                                        <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Rate</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Amount</th>
                                     </tr>
                                 </thead>
@@ -427,6 +449,7 @@ const FlowerWiseReport = () => {
                                     <tr style="font-weight:bold; background:#f8fafc;">
                                         <td colspan="2" style="padding:8px; border-top:1.5px solid #e2e8f0; color:#1e293b;">Total:</td>
                                         <td style="text-align:right; padding:8px; border-top:1.5px solid #e2e8f0; color:#0f172a;">${salesData.totalKg.toFixed(2)}</td>
+                                        <td style="border-top:1.5px solid #e2e8f0;"></td>
                                         <td style="text-align:right; padding:8px; border-top:1.5px solid #e2e8f0; color:#16a34a;">${fmt(salesData.totalAmount)}</td>
                                     </tr>
                                 </tfoot>
@@ -511,7 +534,7 @@ const FlowerWiseReport = () => {
 
             let purchasesRows = '';
             if (group.purchases.list.length === 0) {
-                purchasesRows = `<tr><td colspan="5" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">${lang === 'ta' ? 'கொள்முதல் எதுவும் இல்லை' : 'No purchases.'}</td></tr>`;
+                purchasesRows = `<tr><td colspan="6" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">${lang === 'ta' ? 'கொள்முதல் எதுவும் இல்லை' : 'No purchases.'}</td></tr>`;
             } else {
                 purchasesRows = group.purchases.list.map((item, idx) => `
                     <tr>
@@ -519,6 +542,7 @@ const FlowerWiseReport = () => {
                         <td>${item.name}</td>
                         <td>${item.source}</td>
                         <td class="right">${item.quantity.toFixed(2)}</td>
+                        <td class="right">${fmt(item.rate)}</td>
                         <td class="right">${fmt(item.total)}</td>
                     </tr>
                 `).join('');
@@ -526,13 +550,14 @@ const FlowerWiseReport = () => {
 
             let salesRows = '';
             if (group.sales.list.length === 0) {
-                salesRows = `<tr><td colspan="4" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">${lang === 'ta' ? 'விற்பனை எதுவும் இல்லை' : 'No sales.'}</td></tr>`;
+                salesRows = `<tr><td colspan="5" style="text-align:center; font-style:italic; padding:10px; color:#94a3b8;">${lang === 'ta' ? 'விற்பனை எதுவும் இல்லை' : 'No sales.'}</td></tr>`;
             } else {
                 salesRows = group.sales.list.map((item, idx) => `
                     <tr>
                         <td>${idx + 1}</td>
                         <td>${formatNameForPrint(item, lang)}</td>
                         <td class="right">${item.quantity.toFixed(2)}</td>
+                        <td class="right">${fmt(item.rate)}</td>
                         <td class="right">${fmt(item.total)}</td>
                     </tr>
                 `).join('');
@@ -552,6 +577,7 @@ const FlowerWiseReport = () => {
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">Vendor/Farmer</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">Source</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">KG</th>
+                                        <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Rate</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Amount</th>
                                     </tr>
                                 </thead>
@@ -569,6 +595,7 @@ const FlowerWiseReport = () => {
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">S.No</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:left; padding:8px; color:#475569;">Customer</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">KG</th>
+                                        <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Rate</th>
                                         <th style="border-bottom:1.5px solid #e2e8f0; text-align:right; padding:8px; color:#475569;">Amount</th>
                                     </tr>
                                 </thead>
@@ -710,7 +737,8 @@ const FlowerWiseReport = () => {
                         doc.text(lang === 'ta' ? 'வ.எண்' : 'S.No', 16, y + 4.5);
                         doc.text(lang === 'ta' ? 'விற்பனையாளர்/விவசாயி' : 'Vendor/Farmer', 46, y + 4.5);
                         doc.text(lang === 'ta' ? 'வகை' : 'Source', 96, y + 4.5);
-                        doc.text('KG', 136, y + 4.5, { align: 'right' });
+                        doc.text('KG', 132, y + 4.5, { align: 'right' });
+                        doc.text(lang === 'ta' ? 'விலை' : 'Rate', 156, y + 4.5, { align: 'right' });
                         doc.text(lang === 'ta' ? 'பற்று (Dr)' : 'Debit (Dr)', 182, y + 4.5, { align: 'right' });
                         y += 7;
                         doc.setFont('Helvetica', 'normal');
@@ -725,7 +753,8 @@ const FlowerWiseReport = () => {
                                 doc.text(String(idx + 1), 16, y + 4.5);
                                 doc.text(item.name || '', 46, y + 4.5);
                                 doc.text(item.source || '', 96, y + 4.5);
-                                doc.text((item.quantity || 0).toFixed(2), 136, y + 4.5, { align: 'right' });
+                                doc.text((item.quantity || 0).toFixed(2), 132, y + 4.5, { align: 'right' });
+                                doc.text(fmt(item.rate), 156, y + 4.5, { align: 'right' });
                                 doc.text(fmt(item.total), 182, y + 4.5, { align: 'right' });
                                 y += 7;
                             });
@@ -734,7 +763,7 @@ const FlowerWiseReport = () => {
                         doc.line(14, y, 196, y);
                         doc.setFont('Helvetica', 'bold');
                         doc.text(lang === 'ta' ? `மொத்த கொள்முதல்:` : `Total ${group.flowerName} Purchase:`, 46, y + 4.5);
-                        doc.text((group.purchases.totalKg || 0).toFixed(2), 136, y + 4.5, { align: 'right' });
+                        doc.text((group.purchases.totalKg || 0).toFixed(2), 132, y + 4.5, { align: 'right' });
                         doc.text(fmt(group.purchases.totalAmount), 182, y + 4.5, { align: 'right' });
                         doc.line(14, y + 7, 196, y + 7);
                         y += 12;
@@ -750,7 +779,8 @@ const FlowerWiseReport = () => {
                         doc.setFontSize(8);
                         doc.text(lang === 'ta' ? 'வ.எண்' : 'S.No', 16, y + 4.5);
                         doc.text(lang === 'ta' ? 'வாடிக்கையாளர்' : 'Customer Name', 46, y + 4.5);
-                        doc.text('KG', 136, y + 4.5, { align: 'right' });
+                        doc.text('KG', 132, y + 4.5, { align: 'right' });
+                        doc.text(lang === 'ta' ? 'விலை' : 'Rate', 156, y + 4.5, { align: 'right' });
                         doc.text(lang === 'ta' ? 'வரவு (Cr)' : 'Credit (Cr)', 182, y + 4.5, { align: 'right' });
                         y += 7;
                         doc.setFont('Helvetica', 'normal');
@@ -764,7 +794,8 @@ const FlowerWiseReport = () => {
                                 doc.line(14, y, 196, y);
                                 doc.text(String(idx + 1), 16, y + 4.5);
                                 doc.text(item.name || '', 46, y + 4.5);
-                                doc.text((item.quantity || 0).toFixed(2), 136, y + 4.5, { align: 'right' });
+                                doc.text((item.quantity || 0).toFixed(2), 132, y + 4.5, { align: 'right' });
+                                doc.text(fmt(item.rate), 156, y + 4.5, { align: 'right' });
                                 doc.text(fmt(item.total), 182, y + 4.5, { align: 'right' });
                                 y += 7;
                             });
@@ -773,7 +804,7 @@ const FlowerWiseReport = () => {
                         doc.line(14, y, 196, y);
                         doc.setFont('Helvetica', 'bold');
                         doc.text(lang === 'ta' ? `மொத்த விற்பனை:` : `Total ${group.flowerName} Sales:`, 46, y + 4.5);
-                        doc.text((group.sales.totalKg || 0).toFixed(2), 136, y + 4.5, { align: 'right' });
+                        doc.text((group.sales.totalKg || 0).toFixed(2), 132, y + 4.5, { align: 'right' });
                         doc.text(fmt(group.sales.totalAmount), 182, y + 4.5, { align: 'right' });
                         doc.line(14, y + 7, 196, y + 7);
                         
@@ -792,7 +823,8 @@ const FlowerWiseReport = () => {
                 doc.text(lang === 'ta' ? 'வ.எண்' : 'S.No', 16, y + 5.5);
                 doc.text(lang === 'ta' ? 'விற்பனையாளர்/விவசாயி' : 'Vendor/Farmer', 46, y + 5.5);
                 doc.text(lang === 'ta' ? 'வகை' : 'Source', 96, y + 5.5);
-                doc.text('KG', 136, y + 5.5, { align: 'right' });
+                doc.text('KG', 132, y + 5.5, { align: 'right' });
+                doc.text(lang === 'ta' ? 'விலை' : 'Rate', 156, y + 5.5, { align: 'right' });
                 doc.text(lang === 'ta' ? 'பற்று (Dr)' : 'Debit (Dr)', 182, y + 5.5, { align: 'right' });
 
                 y += 8;
@@ -804,7 +836,8 @@ const FlowerWiseReport = () => {
                     doc.text(String(idx + 1), 16, y + 5.5);
                     doc.text(item.name || '', 46, y + 5.5);
                     doc.text(item.source || '', 96, y + 5.5);
-                    doc.text((item.quantity || 0).toFixed(2), 136, y + 5.5, { align: 'right' });
+                    doc.text((item.quantity || 0).toFixed(2), 132, y + 5.5, { align: 'right' });
+                    doc.text(fmt(item.rate), 156, y + 5.5, { align: 'right' });
                     doc.text(fmt(item.total), 182, y + 5.5, { align: 'right' });
                     y += 8;
                 });
@@ -813,7 +846,7 @@ const FlowerWiseReport = () => {
                 doc.line(14, y, 196, y);
                 doc.setFont('Helvetica', 'bold');
                 doc.text(lang === 'ta' ? 'மொத்தம்' : 'Total', 46, y + 5.5);
-                doc.text((purchaseData.totalKg || 0).toFixed(2), 136, y + 5.5, { align: 'right' });
+                doc.text((purchaseData.totalKg || 0).toFixed(2), 132, y + 5.5, { align: 'right' });
                 doc.text(fmt(purchaseData.totalAmount), 182, y + 5.5, { align: 'right' });
                 doc.line(14, y + 8, 196, y + 8);
                 y += 18;
@@ -831,7 +864,8 @@ const FlowerWiseReport = () => {
                 doc.setFontSize(9);
                 doc.text(lang === 'ta' ? 'வ.எண்' : 'S.No', 16, y + 5.5);
                 doc.text(lang === 'ta' ? 'வாடிக்கையாளர்' : 'Customer Name', 46, y + 5.5);
-                doc.text('KG', 136, y + 5.5, { align: 'right' });
+                doc.text('KG', 132, y + 5.5, { align: 'right' });
+                doc.text(lang === 'ta' ? 'விலை' : 'Rate', 156, y + 5.5, { align: 'right' });
                 doc.text(lang === 'ta' ? 'வரவு (Cr)' : 'Credit (Cr)', 182, y + 5.5, { align: 'right' });
 
                 y += 8;
@@ -842,7 +876,8 @@ const FlowerWiseReport = () => {
                     doc.line(14, y, 196, y);
                     doc.text(String(idx + 1), 16, y + 5.5);
                     doc.text(item.name || '', 46, y + 5.5);
-                    doc.text((item.quantity || 0).toFixed(2), 136, y + 5.5, { align: 'right' });
+                    doc.text((item.quantity || 0).toFixed(2), 132, y + 5.5, { align: 'right' });
+                    doc.text(fmt(item.rate), 156, y + 5.5, { align: 'right' });
                     doc.text(fmt(item.total), 182, y + 5.5, { align: 'right' });
                     y += 8;
                 });
@@ -851,7 +886,7 @@ const FlowerWiseReport = () => {
                 doc.line(14, y, 196, y);
                 doc.setFont('Helvetica', 'bold');
                 doc.text(lang === 'ta' ? 'மொத்தம்' : 'Total', 46, y + 5.5);
-                doc.text((salesData.totalKg || 0).toFixed(2), 136, y + 5.5, { align: 'right' });
+                doc.text((salesData.totalKg || 0).toFixed(2), 132, y + 5.5, { align: 'right' });
                 doc.text(fmt(salesData.totalAmount), 182, y + 5.5, { align: 'right' });
                 doc.line(14, y + 8, 196, y + 8);
             }
@@ -878,27 +913,27 @@ const FlowerWiseReport = () => {
                     dataRows.push([`🌸 ${displayName.toUpperCase()}`]);
                     
                     dataRows.push(['Debit (Dr) / Purchase']);
-                    dataRows.push(['S.No', 'Vendor/Farmer', 'Source', 'KG', 'Amount (INR)']);
+                    dataRows.push(['S.No', 'Vendor/Farmer', 'Source', 'KG', 'Rate', 'Amount (INR)']);
                     if (group.purchases.list.length === 0) {
                         dataRows.push(['No purchases']);
                     } else {
                         group.purchases.list.forEach((item, idx) => {
-                            dataRows.push([idx + 1, item.name, item.source, item.quantity, item.total]);
+                            dataRows.push([idx + 1, item.name, item.source, item.quantity, item.rate, item.total]);
                         });
                     }
-                    dataRows.push([`Total ${group.flowerName} Purchase`, '', '', group.purchases.totalKg, group.purchases.totalAmount]);
+                    dataRows.push([`Total ${group.flowerName} Purchase`, '', '', group.purchases.totalKg, '', group.purchases.totalAmount]);
                     dataRows.push([]); // spacer
 
                     dataRows.push(['Credit (Cr) / Sales']);
-                    dataRows.push(['S.No', 'Customer', 'KG', 'Amount (INR)']);
+                    dataRows.push(['S.No', 'Customer', 'KG', 'Rate', 'Amount (INR)']);
                     if (group.sales.list.length === 0) {
                         dataRows.push(['No sales']);
                     } else {
                         group.sales.list.forEach((item, idx) => {
-                            dataRows.push([idx + 1, item.name, item.quantity, item.total]);
+                            dataRows.push([idx + 1, item.name, item.quantity, item.rate, item.total]);
                         });
                     }
-                    dataRows.push([`Total ${group.flowerName} Sales`, '', group.sales.totalKg, group.sales.totalAmount]);
+                    dataRows.push([`Total ${group.flowerName} Sales`, '', group.sales.totalKg, '', group.sales.totalAmount]);
                     dataRows.push([]); // spacer
                     dataRows.push(['====================================================']);
                     dataRows.push([]); // spacer
@@ -913,6 +948,7 @@ const FlowerWiseReport = () => {
                     'Vendor/Farmer Name': item.name,
                     'Source (Farmer/Vendor)': item.source,
                     'Quantity (KG)': item.quantity,
+                    'Rate': item.rate,
                     'Purchase Amount (INR)': item.total
                 }));
                 purchaseRows.push({
@@ -920,6 +956,7 @@ const FlowerWiseReport = () => {
                     'Vendor/Farmer Name': '',
                     'Source (Farmer/Vendor)': '',
                     'Quantity (KG)': purchaseData.totalKg,
+                    'Rate': '',
                     'Purchase Amount (INR)': purchaseData.totalAmount
                 });
                 const wsPurchase = XLSX.utils.json_to_sheet(purchaseRows);
@@ -930,12 +967,14 @@ const FlowerWiseReport = () => {
                     'S.No': idx + 1,
                     'Customer Name': item.name,
                     'Quantity (KG)': item.quantity,
+                    'Rate': item.rate,
                     'Sales Amount (INR)': item.total
                 }));
                 salesRows.push({
                     'S.No': 'Total',
                     'Customer Name': '',
                     'Quantity (KG)': salesData.totalKg,
+                    'Rate': '',
                     'Sales Amount (INR)': salesData.totalAmount
                 });
                 const wsSales = XLSX.utils.json_to_sheet(salesRows);
@@ -1203,13 +1242,14 @@ const FlowerWiseReport = () => {
                                                         <th style={{ ...TH_S, width: '35px' }}>S.No</th>
                                                         <th style={TH_S}>{lang === 'ta' ? 'வழங்குநர்' : 'Vendor/Farmer'}</th>
                                                         <th style={{ ...TH_S, textAlign: 'right', width: '55px' }}>KG</th>
+                                                        <th style={{ ...TH_S, textAlign: 'right', width: '65px' }}>{lang === 'ta' ? 'விலை' : 'Rate'}</th>
                                                         <th style={{ ...TH_S, textAlign: 'right', width: '80px' }}>Amount</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {group.purchases.list.length === 0 ? (
                                                         <tr>
-                                                            <td colSpan={4} style={{ padding: '24px', textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
+                                                            <td colSpan={5} style={{ padding: '24px', textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
                                                                 {lang === 'ta' ? 'கொள்முதல் எதுவும் இல்லை' : 'No purchases.'}
                                                             </td>
                                                         </tr>
@@ -1224,6 +1264,7 @@ const FlowerWiseReport = () => {
                                                                     </span>
                                                                 </td>
                                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a' }}>{item.quantity.toFixed(2)}</td>
+                                                                <td style={{ ...TD_S, textAlign: 'right', color: '#475569' }}>{fmt(item.rate)}</td>
                                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#ef4444' }}>{fmt(item.total)}</td>
                                                             </tr>
                                                         ))
@@ -1243,13 +1284,14 @@ const FlowerWiseReport = () => {
                                                         <th style={{ ...TH_S, width: '35px' }}>S.No</th>
                                                         <th style={TH_S}>{lang === 'ta' ? 'வாடிக்கையாளர்' : 'Customer'}</th>
                                                         <th style={{ ...TH_S, textAlign: 'right', width: '55px' }}>KG</th>
+                                                        <th style={{ ...TH_S, textAlign: 'right', width: '65px' }}>{lang === 'ta' ? 'விலை' : 'Rate'}</th>
                                                         <th style={{ ...TH_S, textAlign: 'right', width: '80px' }}>Amount</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {group.sales.list.length === 0 ? (
                                                         <tr>
-                                                            <td colSpan={4} style={{ padding: '12px', textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
+                                                            <td colSpan={5} style={{ padding: '12px', textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
                                                                 {lang === 'ta' ? 'விற்பனை எதுவும் இல்லை' : 'No sales.'}
                                                             </td>
                                                         </tr>
@@ -1259,6 +1301,7 @@ const FlowerWiseReport = () => {
                                                                 <td style={TD_S}>{idx + 1}</td>
                                                                 <BuyerNameCell item={item} />
                                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a' }}>{item.quantity.toFixed(2)}</td>
+                                                                <td style={{ ...TD_S, textAlign: 'right', color: '#475569' }}>{fmt(item.rate)}</td>
                                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#16a34a' }}>{fmt(item.total)}</td>
                                                             </tr>
                                                         ))
@@ -1349,20 +1392,21 @@ const FlowerWiseReport = () => {
                             </div>
                         </div>
 
-                        <div style={{ overflowX: 'auto', flex: 1 }}>
+                        <div style={{ overflowX: 'auto', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr>
                                         <th style={{ ...TH_S, width: '35px' }}>S.No</th>
                                         <th style={TH_S}>{lang === 'ta' ? 'வழங்குநர்' : 'Vendor/Farmer'}</th>
                                         <th style={{ ...TH_S, textAlign: 'right', width: '55px' }}>KG</th>
+                                        <th style={{ ...TH_S, textAlign: 'right', width: '65px' }}>{lang === 'ta' ? 'விலை' : 'Rate'}</th>
                                         <th style={{ ...TH_S, textAlign: 'right', width: '80px' }}>{lang === 'ta' ? 'பற்று (Dr)' : 'Debit (Dr)'}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {purchaseData.list.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} style={{ padding: '12px', textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
+                                            <td colSpan={5} style={{ padding: '12px', textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
                                                 {lang === 'ta' ? 'பரிவர்த்தனைகள் எதுவும் இல்லை' : 'No records found.'}
                                             </td>
                                         </tr>
@@ -1377,52 +1421,57 @@ const FlowerWiseReport = () => {
                                                     </span>
                                                 </td>
                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a' }}>{item.quantity.toFixed(2)}</td>
+                                                <td style={{ ...TD_S, textAlign: 'right', color: '#475569' }}>{fmt(item.rate)}</td>
                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#ef4444' }}>{fmt(item.total)}</td>
                                             </tr>
                                         ))
                                     )}
                                 </tbody>
-                                {purchaseData.list.length > 0 && (
+                            </table>
+                            {purchaseData.list.length > 0 && (
+                                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 'auto' }}>
                                     <tfoot>
                                         <tr style={{ background: '#f8fafc', fontWeight: 850 }}>
                                             <td colSpan={2} style={{ ...TD_S, color: '#1e293b', borderTop: '2px solid #e2e8f0' }}>{lang === 'ta' ? 'மொத்தம்' : 'Total'}</td>
-                                            <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a', borderTop: '2px solid #e2e8f0' }}>{purchaseData.totalKg.toFixed(2)}</td>
-                                            <td style={{ ...TD_S, textAlign: 'right', color: '#ef4444', borderTop: '2px solid #e2e8f0' }}>{fmt(purchaseData.totalAmount)}</td>
+                                            <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a', borderTop: '2px solid #e2e8f0', width: '55px' }}>{purchaseData.totalKg.toFixed(2)}</td>
+                                            <td style={{ ...TD_S, borderTop: '2px solid #e2e8f0', width: '65px' }}></td>
+                                            <td style={{ ...TD_S, textAlign: 'right', color: '#ef4444', borderTop: '2px solid #e2e8f0', width: '80px' }}>{fmt(purchaseData.totalAmount)}</td>
                                         </tr>
                                     </tfoot>
-                                )}
-                            </table>
+                                </table>
+                            )}
                         </div>
                     </div>
-
+ 
                     {/* Right Panel: Sales Summary (Credit / Cr) */}
                     <div style={{ background: '#fff', border: '1px solid #f1f5f9', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', borderBottom: '2px solid #f8fafc', paddingBottom: '8px' }}>
                             <div style={{ width: '36px', height: '36px', background: '#fdf2f8', border: '1.5px solid #fbcfe8', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>📤</div>
                             <div>
                                 <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#1e293b' }}>
-                                    {lang === 'ta' ? 'வரவு (Cr) / விற்பனை' : 'Credit (Cr) / Sales'}
+                                     {lang === 'ta' ? 'வரவு (Cr) / விற்பனை' : 'Credit (Cr) / Sales'}
                                 </h3>
                                 <p style={{ margin: 0, fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>
                                     {lang === 'ta' ? 'வாடிக்கையாளர்கள்' : 'Customers'}
                                 </p>
                             </div>
                         </div>
-
-                        <div style={{ overflowX: 'auto', flex: 1 }}>
+ 
+                        <div style={{ overflowX: 'auto', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr>
                                         <th style={{ ...TH_S, width: '35px' }}>S.No</th>
                                         <th style={TH_S}>{lang === 'ta' ? 'வாடிக்கையாளர்' : 'Customer'}</th>
                                         <th style={{ ...TH_S, textAlign: 'right', width: '55px' }}>KG</th>
+                                        <th style={{ ...TH_S, textAlign: 'right', width: '65px' }}>{lang === 'ta' ? 'விலை' : 'Rate'}</th>
                                         <th style={{ ...TH_S, textAlign: 'right', width: '80px' }}>{lang === 'ta' ? 'வரவு (Cr)' : 'Credit (Cr)'}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {salesData.list.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} style={{ padding: '12px', textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
+                                            <td colSpan={5} style={{ padding: '12px', textAlign: 'center', fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
                                                 {lang === 'ta' ? 'பரிவர்த்தனைகள் எதுவும் இல்லை' : 'No records found.'}
                                             </td>
                                         </tr>
@@ -1432,21 +1481,25 @@ const FlowerWiseReport = () => {
                                                 <td style={TD_S}>{idx + 1}</td>
                                                 <BuyerNameCell item={item} />
                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a' }}>{item.quantity.toFixed(2)}</td>
+                                                <td style={{ ...TD_S, textAlign: 'right', color: '#475569' }}>{fmt(item.rate)}</td>
                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#16a34a' }}>{fmt(item.total)}</td>
                                             </tr>
                                         ))
                                     )}
                                 </tbody>
-                                {salesData.list.length > 0 && (
+                            </table>
+                            {salesData.list.length > 0 && (
+                                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 'auto' }}>
                                     <tfoot>
                                         <tr style={{ background: '#f8fafc', fontWeight: 850 }}>
                                             <td colSpan={2} style={{ ...TD_S, color: '#1e293b', borderTop: '2px solid #e2e8f0' }}>{lang === 'ta' ? 'மொத்தம்' : 'Total'}</td>
-                                            <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a', borderTop: '2px solid #e2e8f0' }}>{salesData.totalKg.toFixed(2)}</td>
-                                            <td style={{ ...TD_S, textAlign: 'right', color: '#16a34a', borderTop: '2px solid #e2e8f0' }}>{fmt(salesData.totalAmount)}</td>
+                                            <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a', borderTop: '2px solid #e2e8f0', width: '55px' }}>{salesData.totalKg.toFixed(2)}</td>
+                                            <td style={{ ...TD_S, borderTop: '2px solid #e2e8f0', width: '65px' }}></td>
+                                            <td style={{ ...TD_S, textAlign: 'right', color: '#16a34a', borderTop: '2px solid #e2e8f0', width: '80px' }}>{fmt(salesData.totalAmount)}</td>
                                         </tr>
                                     </tfoot>
-                                )}
-                            </table>
+                                </table>
+                            )}
                         </div>
                     </div>
 
