@@ -192,6 +192,8 @@ const OutsideShop = () => {
         toDate: new Date().toLocaleDateString('en-CA'),
         vendorId: 'all'
     });
+    const [reportSearch, setReportSearch] = useState('');
+    const [vendorSearch, setVendorSearch] = useState('');
 
     const [payFilterFrom, setPayFilterFrom] = useState(new Date().toLocaleDateString('en-CA'));
     const [payFilterTo, setPayFilterTo] = useState(new Date().toLocaleDateString('en-CA'));
@@ -1489,7 +1491,7 @@ const OutsideShop = () => {
             {showBulkModal && <BulkPrintModal />}
 
             <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #fed7aa', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '24px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '20px', marginBottom: '32px', paddingBottom: '20px', borderBottom: '1px solid #fff7ed' }}>
+                <div className="mobile-stack-grid-header" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '20px', marginBottom: '32px', paddingBottom: '20px', borderBottom: '1px solid #fff7ed' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{ fontSize: '15px' }}>📦</span>
@@ -1525,7 +1527,7 @@ const OutsideShop = () => {
                     )}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 120px', gap: '16px', alignItems: 'flex-end', marginBottom: '20px' }}>
+                <div className="mobile-stack-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 120px', gap: '16px', alignItems: 'flex-end', marginBottom: '20px' }}>
                     <div>
                         <label style={LABEL_S}>{t('vendorName')}</label>
                         <SearchSelect 
@@ -1843,44 +1845,92 @@ const OutsideShop = () => {
         </div>
     );
 
-    const renderVendors = () => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    const renderVendors = () => {
+        const filteredVendorsList = vendors.filter(v => {
+            if (!vendorSearch) return true;
+            const searchLower = vendorSearch.toLowerCase().trim();
+            const vName = (v.name || '').toLowerCase();
+            const vNameTa = (v.nameTa || '').toLowerCase();
+            const displayId = `v${v.displayId || ''}`.toLowerCase();
+            const contact = (v.contact || '').toLowerCase();
+            const location = (v.location || '').toLowerCase();
+            return vName.includes(searchLower) || vNameTa.includes(searchLower) || displayId.includes(searchLower) || contact.includes(searchLower) || location.includes(searchLower);
+        });
 
-            <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-                <div style={{ padding: '24px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Users size={20} color="#64748b" />
-                        <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1e293b', margin: 0 }}>{t('vendorName')}</h2>
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+                    <div className="mobile-stack-header" style={{ padding: '24px', borderBottom: '1px solid #f1f5f9', display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Users size={20} color="#64748b" />
+                            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1e293b', margin: 0 }}>{t('vendorName')}</h2>
+                        </div>
+                        
+                        {/* Search Input */}
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', minWidth: '240px', maxWidth: '300px' }}>
+                            <input 
+                                type="text" 
+                                value={vendorSearch} 
+                                onChange={e => setVendorSearch(e.target.value)} 
+                                placeholder={lang === 'ta' ? 'பெயர், ஐடி, இடம் மூலம் தேடுக...' : 'Search by name, ID, place...'} 
+                                style={{
+                                    ...INPUT_S,
+                                    paddingRight: '32px'
+                                }}
+                            />
+                            {vendorSearch && (
+                                <button 
+                                    onClick={() => setVendorSearch('')} 
+                                    style={{
+                                        position: 'absolute',
+                                        right: '10px',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: '#94a3b8',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: 0
+                                    }}
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
+
+                        <button 
+                            onClick={() => { 
+                                const nextId = vendors.length > 0 ? Math.max(...vendors.map(v => parseInt(v.displayId) || 0)) + 1 : 101;
+                                setEditingVendor(null); 
+                                setVendorForm({name:'', nameTa:'', contact:'', location:'', displayId: nextId, balance: 0}); 
+                                setTouched({ name: false, nameTa: false }); 
+                                setShowVendorModal(true); 
+                            }}
+                            style={{ padding: '10px 20px', background: '#d97706', color: '#fff', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        >
+                            <Plus size={18} /> {t('addVendor')}
+                        </button>
                     </div>
-                    <button 
-                        onClick={() => { 
-                            const nextId = vendors.length > 0 ? Math.max(...vendors.map(v => parseInt(v.displayId) || 0)) + 1 : 101;
-                            setEditingVendor(null); 
-                            setVendorForm({name:'', nameTa:'', contact:'', location:'', displayId: nextId, balance: 0}); 
-                            setTouched({ name: false, nameTa: false }); 
-                            setShowVendorModal(true); 
-                        }}
-                        style={{ padding: '10px 20px', background: '#d97706', color: '#fff', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-                    >
-                        <Plus size={18} /> {t('addVendor')}
-                    </button>
-                </div>
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ background: '#fff', borderBottom: '1.5px solid #f1f5f9' }}>
-                                <th style={TH_S}>{t('id')}</th>
-                                <th style={TH_S}>{t('name')}</th>
-                                <th style={TH_S}>{t('contact')}</th>
-                                <th style={TH_S}>{t('location')}</th>
-                                <th style={{...TH_S, textAlign: 'right'}}>{t('balance')}</th>
-                                <th style={{...TH_S, textAlign: 'center'}}>{t('action')}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {vendors.length === 0 ? (
-                                <tr><td colSpan={6} style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>{t('noRecords')}</td></tr>
-                            ) : vendors.map((v, i) => (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ background: '#fff', borderBottom: '1.5px solid #f1f5f9' }}>
+                                    <th style={TH_S}>{t('id')}</th>
+                                    <th style={TH_S}>{t('name')}</th>
+                                    <th style={TH_S}>{t('contact')}</th>
+                                    <th style={TH_S}>{t('location')}</th>
+                                    <th style={{...TH_S, textAlign: 'right'}}>{t('balance')}</th>
+                                    <th style={{...TH_S, textAlign: 'center'}}>{t('action')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredVendorsList.length === 0 ? (
+                                    <tr><td colSpan={6} style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>{t('noRecords')}</td></tr>
+                                ) : filteredVendorsList.map((v, i) => (
                                 <tr key={v.id} style={{ borderBottom: '1px solid #f8fafc', background: i%2===0 ? '#fff' : '#fafafa' }}>
                                     <td style={TD_S}><span style={{ fontWeight: 800, color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>#V{v.displayId}</span></td>
                                     <td style={TD_S}>
@@ -1902,7 +1952,8 @@ const OutsideShop = () => {
                 </div>
             </div>
         </div>
-    );
+        );
+    };
 
     const renderVendorPayments = () => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -2092,7 +2143,13 @@ const OutsideShop = () => {
                                 return filteredPayments.map((p, idx) => (
                                     <tr key={p.id} style={{ borderBottom: '1px solid #f8fafc', background: idx%2===0 ? '#fff' : '#fafafa' }}>
                                         <td style={TD_S}>{p.date || '---'}</td>
-                                        <td style={{ ...TD_S, fontWeight: 700 }}>{vendors.find(v => v.id === p.entityId)?.name || '---'}</td>
+                                        <td style={{ ...TD_S, fontWeight: 700 }}>
+                                            {(() => {
+                                                const vend = vendors.find(v => v.id === p.entityId);
+                                                if (!vend) return '---';
+                                                return lang === 'ta' ? (vend.nameTa || vend.name) : vend.name;
+                                            })()}
+                                        </td>
                                         <td style={{ ...TD_S, color: '#64748b' }}>{p.note || '---'}</td>
                                         <td style={{ ...TD_S, textAlign: 'right', fontWeight: 800, color: '#16a34a' }}>{fmt(p.amount)}</td>
                                         <td style={{ ...TD_S, textAlign: 'center' }}>
@@ -2214,6 +2271,15 @@ const OutsideShop = () => {
             });
         });
 
+        const displayedReportRows = reportRows.filter(row => {
+            if (!reportSearch) return true;
+            const searchLower = reportSearch.toLowerCase().trim();
+            const vName = (row.vendor.name || '').toLowerCase();
+            const vNameTa = (row.vendor.nameTa || '').toLowerCase();
+            const displayId = `v${row.vendor.displayId || ''}`.toLowerCase();
+            return vName.includes(searchLower) || vNameTa.includes(searchLower) || displayId.includes(searchLower);
+        });
+
 
 
         return (
@@ -2241,6 +2307,42 @@ const OutsideShop = () => {
                                 idPrefix="V"
                                 lang={lang}
                             />
+                        </div>
+                        <div style={{ minWidth: '200px' }}>
+                            <label style={LABEL_S}>{lang === 'ta' ? 'தேடல்' : 'Search'}</label>
+                            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                <input 
+                                    type="text" 
+                                    value={reportSearch} 
+                                    onChange={e => setReportSearch(e.target.value)} 
+                                    placeholder={lang === 'ta' ? 'பெயர் அல்லது ஐடி மூலம் தேடுக...' : 'Search by name or ID...'} 
+                                    style={{
+                                        ...INPUT_S,
+                                        paddingRight: '32px'
+                                    }}
+                                />
+                                {reportSearch && (
+                                    <button 
+                                        onClick={() => setReportSearch('')} 
+                                        style={{
+                                            position: 'absolute',
+                                            right: '10px',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            color: '#94a3b8',
+                                            fontSize: '14px',
+                                            fontWeight: 'bold',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            padding: 0
+                                        }}
+                                    >
+                                        ✕
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -2378,14 +2480,14 @@ const OutsideShop = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {reportRows.length === 0 ? (
+                                {displayedReportRows.length === 0 ? (
                                     <tr>
                                         <td colSpan={isBulkModeActive ? 8 : 7} style={{ ...TD_S, textAlign: 'center', color: '#94a3b8', fontStyle: 'italic', padding: '30px' }}>
                                             No records found.
                                         </td>
                                     </tr>
                                 ) : (
-                                    reportRows.map((row, i) => {
+                                    displayedReportRows.map((row, i) => {
                                         const v = row.vendor;
                                         // For bulk autofill limit calculation, we compute period total and period paid
                                         const periodPurchases = purchases.filter(p => p.vendorId === v.id && p.date >= reportFilters.fromDate && p.date <= reportFilters.toDate);
@@ -2396,7 +2498,7 @@ const OutsideShop = () => {
                                         return (
                                             <tr key={`${v.id}-${row.date}`} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                                 <td style={TD_S}>
-                                                    <div style={{fontWeight: 700}}>{v.name}</div>
+                                                    <div style={{fontWeight: 700}}>{lang === 'ta' ? (v.nameTa || v.name) : v.name}</div>
                                                     <div style={{fontSize: '11px', color: '#94a3b8'}}>#V{v.displayId}</div>
                                                 </td>
                                                 <td style={{ ...TD_S, fontWeight: 700, color: '#64748b' }}>
@@ -2503,7 +2605,7 @@ const OutsideShop = () => {
                     <div style={{ background: '#fff', borderRadius: '24px', width: '900px', maxWidth: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #fed7aa' }}>
                         <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb' }}>
                             <div>
-                                <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 900, color: '#92400e' }}>{viewingVendor.name}</h2>
+                                <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 900, color: '#92400e' }}>{lang === 'ta' ? (viewingVendor.nameTa || viewingVendor.name) : viewingVendor.name}</h2>
                                 <p style={{ margin: 0, fontSize: '12px', color: '#92400e', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Transaction Ledger</p>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto', marginRight: '20px' }}>
@@ -2620,7 +2722,7 @@ const OutsideShop = () => {
                 <div style={{ background: '#fff', borderRadius: '24px', width: '900px', maxWidth: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #fed7aa' }}>
                     <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb' }}>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 900, color: '#92400e' }}>{viewingVendor.name}</h2>
+                            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 900, color: '#92400e' }}>{lang === 'ta' ? (viewingVendor.nameTa || viewingVendor.name) : viewingVendor.name}</h2>
                             <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginTop: '4px' }}>
                                 <span style={{ fontSize: '12px', color: '#92400e', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Transaction Ledger</span>
                                 <span style={{ fontSize: '13px', background: '#f59e0b', color: '#fff', padding: '2px 10px', borderRadius: '20px', fontWeight: 800 }}>
@@ -2898,7 +3000,7 @@ const OutsideShop = () => {
                         
                         <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#eff6ff' }}>
                             <div>
-                                <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: '#1e3a8a' }}>Month-End Settlement - {settlementVendor.name}</h2>
+                                <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: '#1e3a8a' }}>{lang === 'ta' ? 'மாத இறுதி சரிகட்டுதல்' : 'Month-End Settlement'} - {lang === 'ta' ? (settlementVendor.nameTa || settlementVendor.name) : settlementVendor.name}</h2>
                                 <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#1e3a8a', opacity: 0.8, fontWeight: 600 }}>
                                     Period: {reportFilters.fromDate.split('-').reverse().join('-')} to {reportFilters.toDate.split('-').reverse().join('-')}
                                 </p>

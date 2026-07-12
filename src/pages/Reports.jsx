@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
-import { Search, MessageCircle, BarChart2, X, User, ChevronRight, Download, Printer } from 'lucide-react';
+import { Search, MessageCircle, BarChart2, X, User, ChevronRight, Download, Printer, Share2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { subscribeToCollection, db } from '../utils/storage';
 import { doc, getDoc } from 'firebase/firestore';
@@ -706,6 +706,104 @@ const Reports = () => {
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     };
 
+    const handleWhatsAppReceiptShare = async (row) => {
+        setSharingRowId(row.id);
+        try {
+            // Gather flat sales items for this buyer in applied period
+            const buyerSales = sales.filter(s => {
+                if (s.buyerId !== row.id) return false;
+                const d = s.date || (s.timestamp?.toDate ? toDateStr(s.timestamp.toDate()) : null);
+                return d && d >= appliedFrom && d <= appliedTo;
+            });
+            const flatItems = buyerSales.flatMap(s => (s.items || []).map(item => {
+                const masterFlower = products.find(f => f.name?.trim().toLowerCase() === item.flowerType?.trim().toLowerCase());
+                const localizedName = lang === 'ta'
+                    ? (item.flowerTypeTa || masterFlower?.taName || item.flowerType)
+                    : (masterFlower?.name || item.flowerType);
+                return { ...item, flowerTypeTa: localizedName, flowerType: localizedName };
+            }));
+
+            // Payments in period
+            const buyerPayments = payments.filter(p => {
+                if (p.entityId !== row.id || p.type !== 'buyer') return false;
+                const d = p.timestamp
+                    ? (typeof p.timestamp === 'string' ? p.timestamp.substring(0, 10)
+                        : toDateStr(p.timestamp.toDate ? p.timestamp.toDate() : new Date(p.timestamp)))
+                    : null;
+                return d && d >= appliedFrom && d <= appliedTo;
+            });
+            const paymentsTotal  = buyerPayments.reduce((s, p) => s + (p.amount || 0), 0);
+            const cashLessTotal  = buyerPayments.reduce((s, p) => s + (p.cashLess || 0), 0);
+
+            // prevBalance should be the opening balance at the start of the period
+            const prevBalance = row.opening;
+
+            const dateLabel = appliedFrom === appliedTo 
+                ? displayDate(appliedFrom)
+                : `${displayDate(appliedFrom)} - ${displayDate(appliedTo)}`;
+
+            const { blob, url } = await generateBuyerReceiptCanvas({
+                buyer: {
+                    ...row,
+                    name: lang === 'ta' ? (row.nameTa || row.taName || row.name) : row.name
+                },
+                salesItems:    flatItems,
+                salesTotal:    row.sales,
+                paymentsTotal,
+                cashLess:      cashLessTotal,
+                prevBalance,
+                dateLabel,
+                bizInfo,
+                labels: {
+                    date: t('date'),
+                    nameLabel: t('name'),
+                    oldBalance: t('oldBalance'),
+                    cashRec: t('cashRec'),
+                    cashLess: t('cashLess'),
+                    balance: t('balance'),
+                    particulars: t('particulars'),
+                    weight: t('weight'),
+                    rate: t('rate'),
+                    total: t('total'),
+                    grandTotalLabel: t('finalBalance'),
+                    sNo: t('sNo'),
+                    salesLabel: t('sales'),
+                    totalSalesLabel: t('totalSales'),
+                },
+                lang: lang
+            });
+
+            const buyerContact = (row.contact || '').replace(/\D/g, '');
+            const whatsappNumber = buyerContact.length === 10 ? '91' + buyerContact : buyerContact;
+
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'receipt.png', { type: 'image/png' })] })) {
+                await navigator.share({
+                    files: [new File([blob], 'receipt.png', { type: 'image/png' })],
+                    title: `Receipt – ${row.name}`,
+                });
+            } else {
+                // Fallback: download image and redirect to WhatsApp chat
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `receipt_${row.name.replace(/\s+/g,'_')}.png`;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 30000);
+
+                if (whatsappNumber) {
+                    setTimeout(() => {
+                        window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+                    }, 500);
+                }
+            }
+        } catch (err) {
+            console.error('Receipt WhatsApp error:', err);
+            alert('❌ Could not share receipt: ' + err.message);
+        } finally {
+            setSharingRowId(null);
+        }
+    };
+
+
     const handleDownloadXLSX = async () => {
         if (report.length === 0) return alert('No data to download.');
         setIsDownloading(true);
@@ -947,9 +1045,9 @@ const Reports = () => {
                                                 </button>
 
                                                 <button
-                                                    onClick={() => handleShareRow(row)}
+                                                    onClick={() => handleWhatsAppReceiptShare(row)}
                                                     disabled={sharingRowId === row.id}
-                                                    title="Share receipt on WhatsApp"
+                                                    title="Share receipt image on WhatsApp"
                                                     style={{
                                                         width: '32px', height: '32px', borderRadius: '8px',
                                                         border: '1.5px solid ' + (isHighlighted ? 'rgba(255,255,255,0.5)' : '#22c55e'), 
@@ -966,6 +1064,29 @@ const Reports = () => {
                                                     {sharingRowId === row.id
                                                         ? <div style={{ width:'14px', height:'14px', border:'2px solid ' + (isHighlighted ? '#fff' : '#22c55e33'), borderTopColor: isHighlighted ? '#fff' : '#22c55e', borderRadius:'50%', animation:'spin 0.7s linear infinite' }} />
                                                         : <WhatsAppIcon size={14} />
+                                                    }
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleShareRow(row)}
+                                                    disabled={sharingRowId === row.id}
+                                                    title="Share receipt image"
+                                                    style={{
+                                                        width: '32px', height: '32px', borderRadius: '8px',
+                                                        border: '1.5px solid ' + (isHighlighted ? 'rgba(255,255,255,0.5)' : '#f59e0b'), 
+                                                        background: isHighlighted ? 'rgba(255,255,255,0.1)' : '#fff',
+                                                        color: isHighlighted ? '#fff' : '#f59e0b', display: 'inline-flex',
+                                                        alignItems: 'center', justifyContent: 'center',
+                                                        cursor: sharingRowId === row.id ? 'not-allowed' : 'pointer',
+                                                        opacity: sharingRowId === row.id ? 0.5 : 1,
+                                                        flexShrink: 0,
+                                                    }}
+                                                    onMouseEnter={e => { if (!isHighlighted && sharingRowId !== row.id) { e.currentTarget.style.background='#f59e0b'; e.currentTarget.style.color='#fff'; }}}
+                                                    onMouseLeave={e => { if (!isHighlighted) { e.currentTarget.style.background='#fff'; e.currentTarget.style.color='#f59e0b'; }}}
+                                                >
+                                                    {sharingRowId === row.id
+                                                        ? <div style={{ width:'14px', height:'14px', border:'2px solid ' + (isHighlighted ? '#fff' : '#f59e0b33'), borderTopColor: isHighlighted ? '#fff' : '#f59e0b', borderRadius:'50%', animation:'spin 0.7s linear infinite' }} />
+                                                        : <Share2 size={14} />
                                                     }
                                                 </button>
 
