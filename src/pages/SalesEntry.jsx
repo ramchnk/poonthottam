@@ -373,7 +373,7 @@ const SalesEntry = () => {
             <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '24px' }}>
                 
                 {/* ── Header Row (As per User Image) ── */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '20px', marginBottom: '32px', paddingBottom: '20px', borderBottom: '1px solid #f1f5f9' }}>
+                <div className="mobile-stack-grid-header" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '20px', marginBottom: '32px', paddingBottom: '20px', borderBottom: '1px solid #f1f5f9' }}>
                     
                     {/* Left: Label and Date */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

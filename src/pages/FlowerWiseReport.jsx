@@ -1259,9 +1259,7 @@ const FlowerWiseReport = () => {
                                                                 <td style={TD_S}>{idx + 1}</td>
                                                                 <td style={TD_S}>
                                                                     <div>{item.name}</div>
-                                                                    <span style={{ fontSize: '8px', background: '#f1f5f9', color: '#64748b', padding: '1px 4px', borderRadius: '4px', fontWeight: 800, textTransform: 'uppercase' }}>
-                                                                        {item.source}
-                                                                    </span>
+                                                                    
                                                                 </td>
                                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a' }}>{item.quantity.toFixed(2)}</td>
                                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#475569' }}>{fmt(item.rate)}</td>
@@ -1416,9 +1414,7 @@ const FlowerWiseReport = () => {
                                                 <td style={TD_S}>{idx + 1}</td>
                                                 <td style={TD_S}>
                                                     <div>{item.name}</div>
-                                                    <span style={{ fontSize: '9px', background: '#f1f5f9', color: '#64748b', padding: '1px 5px', borderRadius: '4px', fontWeight: 800, textTransform: 'uppercase' }}>
-                                                        {item.source}
-                                                    </span>
+                                                    
                                                 </td>
                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#0f172a' }}>{item.quantity.toFixed(2)}</td>
                                                 <td style={{ ...TD_S, textAlign: 'right', color: '#475569' }}>{fmt(item.rate)}</td>

@@ -27,33 +27,17 @@ export async function generateBuyerReceiptCanvas({
     labels        = {}, // Translation labels
     lang          = 'en',
 }) {
-    const {
-        date = 'தேதி',
-        nameLabel = 'பெயர்',
-        oldBalance = 'முன் பாக்கி',
-        cashRec = 'வரவு',
-        cashLess: cashLessLabel = 'கழி',
-        balance = 'பாக்கி',
-        particulars = 'விபரம்',
-        weight = 'எடை',
-        rate = 'விலை',
-        total = 'தொகை',
-        grandTotalLabel = 'மொத்த பாக்கி',
-        sNo = 'வ.எண்',
-        salesLabel = 'SALES',
-    } = labels;
-
     const W       = 800;
     const PAD     = 50;
-    const LINE_H  = 40;
-    
+    const LINE_H  = 50;
+
     const {
-        motto   = 'SRI RAMA JAYAM',
-        name    = 'S.V.M',
-        type    = 'SRI VALLI FLOWER MERCHANT',
-        address = 'B-7, FLOWER MARKET, TINDIVANAM.',
-        phone1  = '9443247771',
-        phone2  = '9952535057',
+        motto   = '',
+        name    = 'A. விசுவாசம் MV',
+        type    = 'பூ. வியாபாரம், கடை எண் :45',
+        address = '46 பூ மார்க்கெட் திண்டுக்கல்',
+        phone1  = '9486375670',
+        phone2  = '6383529192',
     } = bizInfo;
 
     const fmtNum = (n, dec = 0) =>
@@ -61,8 +45,12 @@ export async function generateBuyerReceiptCanvas({
 
     const displayDate = (iso) => {
         if (!iso) return '';
-        const [y, m, d] = iso.split('-');
-        return `${d}-${m}-${y}`;
+        const parts = iso.split('-');
+        if (parts.length === 3) {
+            const [y, m, d] = parts;
+            return `${d}/${m}/${y}`;
+        }
+        return iso.split('-').reverse().join('/');
     };
 
     const runningBalance = prevBalance - paymentsTotal - cashLess;
@@ -70,13 +58,15 @@ export async function generateBuyerReceiptCanvas({
 
     // ── Calculate Height ──
     const rowsCount = salesItems.length;
-    const H = 850 + (rowsCount * LINE_H); // Reduced base height since we don't force empty rows
+    const baseHeight = 220 + 40 + 90 + 60 + 330 + 80;
+    const H = baseHeight + (rowsCount * LINE_H);
 
     const canvas  = document.createElement('canvas');
     canvas.width  = W;
     canvas.height = H;
     const ctx     = canvas.getContext('2d');
 
+    // Fill background with pure white
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, H);
 
@@ -108,146 +98,161 @@ export async function generateBuyerReceiptCanvas({
         }
     };
 
-    const rect = (x, y, w, h) => {
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth   = 1.5;
-        ctx.strokeRect(x, y, w, h);
-    };
+    let y = 40;
 
-    let y = PAD;
+    // 1. Mottos (Centered, small)
+    if (motto && motto.trim()) {
+        drawText(motto.trim(), W / 2, y, { size: 20, weight: '700', align: 'center' });
+        y += 35;
+    }
 
-    // 1. Mottos
-    if (motto) {
-        drawText(motto, W/2, y, { size: 22, weight: '700', align: 'center' });
+    // 2. Shop Info (Centered, no border boxes)
+    drawText(name, W / 2, y + 25, { size: 48, weight: '900', align: 'center' });
+    y += 70;
+
+    if (type) {
+        drawText(type, W / 2, y, { size: 24, weight: '700', align: 'center' });
+        y += 40;
+    }
+    if (address) {
+        drawText(address, W / 2, y, { size: 24, weight: '700', align: 'center' });
+        y += 40;
+    }
+    const p1 = phone1 ? phone1.trim() : '';
+    const p2 = phone2 ? phone2.trim() : '';
+
+    if (p1 || p2) {
+        const label = lang === 'ta' ? 'போன்' : 'Phone';
+        if (p1) {
+            drawText(`${label}: ${p1}`, PAD, y, { size: 24, weight: '700', align: 'left' });
+        }
+        if (p2) {
+            drawText(`${label}: ${p2}`, W - PAD, y, { size: 24, weight: '700', align: 'right' });
+        }
         y += 40;
     }
 
-    // 2. Shop Info Box
-    const boxY = y;
-    rect(PAD, boxY, W - PAD*2, 200);
-    // Use serif for the name to match the sign board image
-    ctx.font = '900 86px serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(name, W/2, boxY + 65);
-    
-    drawText(type, W/2, boxY + 115, { size: 28, weight: '700', align: 'center' });
-    drawText(address, W/2, boxY + 145, { size: 22, align: 'center' });
-    
-    // Phones at bottom of box - centered
-    drawText(`CELL : ${phone1}           CELL : ${phone2}`, W/2, boxY + 175, { size: 22, weight: '700', align: 'center' });
-    y += 200;
+    y += 20; // Spacer
 
-    // 3. Sales | Date Row
-    rect(PAD, y, W - PAD*2, 45);
-    drawText(salesLabel, PAD + 10, y + 22, { size: 22, weight: '800' });
-    drawText(`${date} : ${dateLabel}`, W - PAD - 10, y + 22, { size: 22, weight: '800', align: 'right' });
+    // 3. Customer Info (Left-aligned, bold, no box)
+    const buyerName = lang === 'ta' ? (buyer.nameTa || buyer.taName || buyer.name) : buyer.name;
+    drawText(buyerName.toUpperCase(), PAD, y, { size: 30, weight: '900' });
     y += 45;
 
-    // 4. Customer & Balance Box
-    const infoH = 160; // Increased for 4 rows
-    rect(PAD, y, W - PAD*2, infoH);
-    // Left: Code / Name
-    drawText(`CODE : ${buyer.displayId || '---'}`, PAD + 15, y + 45, { size: 26, weight: '800' });
-    drawText(`${nameLabel} : ${(buyer.name || '---').toUpperCase()}`, PAD + 15, y + 95, { size: 26, weight: '800', wrapWidth: 390, lineHeight: 32 });
-    
-    // Right: Balance Grid (4 Rows)
-    const balW = 280;
-    const balX = W - PAD - balW;
-    const labelW = 160; // Internal split
-    
-    // Outer Border Line
-    ctx.beginPath(); ctx.moveTo(balX, y); ctx.lineTo(balX, y + infoH); ctx.stroke();
-    // Inner Vertical Line
-    ctx.beginPath(); ctx.moveTo(balX + labelW, y); ctx.lineTo(balX + labelW, y + infoH); ctx.stroke();
-    
-    const drawBalRow = (ly, label, value, isLast = false, valueColor = '#000') => {
-        drawText(label, balX + 10, ly + 20, { size: 18, align: 'left' });
-        drawText(fmtNum(value), W - PAD - 10, ly + 20, { size: 20, weight: '800', align: 'right', color: valueColor });
-        if (!isLast) { ctx.beginPath(); ctx.moveTo(balX, ly + 40); ctx.lineTo(W - PAD, ly + 40); ctx.stroke(); }
-    };
-    drawBalRow(y,       oldBalance, prevBalance);
-    drawBalRow(y + 40,  cashRec,          paymentsTotal, false, '#15803d');
-    drawBalRow(y + 80,  cashLessLabel,           cashLess, false, '#b91c1c');
-    drawBalRow(y + 120, balance,        (prevBalance - paymentsTotal - cashLess), true);
-    y += infoH;
-
-    // 5. Items Table
-    const colW = [85, 235, 100, 120, 160];
-    const cols = [PAD, PAD + colW[0], PAD + colW[0] + colW[1], PAD + colW[0] + colW[1] + colW[2], PAD + colW[0] + colW[1] + colW[2] + colW[3]];
-    
-    // Header
-    rect(PAD, y, W - PAD*2, 45);
-    const headerLabels = [sNo, particulars, weight, rate, total];
-    headerLabels.forEach((lab, i) => {
-        let textX = cols[i];
-        let align = 'center';
-        
-        if (i === 1) { textX = cols[i] + 10; align = 'left'; }
-        else if (i === 0) { textX = cols[0] + colW[0]/2; }
-        else if (i === 2) { textX = cols[2] + colW[2]/2; }
-        else if (i === 3) { textX = cols[3] + colW[3]/2; }
-        else if (i === 4) { textX = W - PAD - 10; align = 'right'; }
-        
-        drawText(lab, textX, y + 22, { size: 20, weight: '800', align });
-        if (i > 0) { ctx.beginPath(); ctx.moveTo(cols[i], y); ctx.lineTo(cols[i], y + 45); ctx.stroke(); }
-    });
+    // 4. Date (Left-aligned, bold, no box)
+    const formattedDate = dateLabel.includes('-') ? displayDate(dateLabel) : dateLabel;
+    drawText(`தேதி : ${formattedDate}`, PAD, y, { size: 24, weight: '700' });
     y += 45;
 
-    // Data Rows
-    const tableStartY = y;
+    // 5. Columns divider line
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(PAD, y);
+    ctx.lineTo(W - PAD, y);
+    ctx.stroke();
+
+    // Table Column Headers
+    y += 25;
+    const colLabels = lang === 'ta' 
+        ? { variety: 'வகை', weight: 'எடை', rate: 'விலை', total: 'தொகை' }
+        : { variety: 'Variety', weight: 'Weight', rate: 'Rate', total: 'Amount' };
+
+    drawText(colLabels.variety, PAD, y, { size: 22, weight: '900', align: 'left' });
+    drawText(colLabels.weight, 420, y, { size: 22, weight: '900', align: 'right' });
+    drawText(colLabels.rate, 580, y, { size: 22, weight: '900', align: 'right' });
+    drawText(colLabels.total, W - PAD, y, { size: 22, weight: '900', align: 'right' });
+
+    y += 25;
+    ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(PAD, y);
+    ctx.lineTo(W - PAD, y);
+    ctx.stroke();
+
+    // 6. Data Rows (No vertical lines)
+    ctx.lineWidth = 1.0;
     for (let i = 0; i < rowsCount; i++) {
         const item = salesItems[i];
-        const rowY = y + 20;
         if (item) {
+            y += LINE_H / 2;
             const fName = lang === 'ta' ? (item.flowerTypeTa || item.flowerType) : item.flowerType;
-            drawText(String(i + 1), cols[0] + colW[0]/2, rowY, { size: 20, align: 'center' });
-            drawText(fName || '', cols[1] + 10, rowY, { size: 22, weight: '600' });
-            drawText(parseFloat(item.quantity).toFixed(3), cols[2] + colW[2]/2, rowY, { size: 20, align: 'center' });
-            drawText(fmtNum(item.price), cols[3] + colW[3]/2, rowY, { size: 20, align: 'center' });
-            drawText(fmtNum(item.total), W - PAD - 10, rowY, { size: 22, weight: '800', align: 'right' });
+            const qtyNum = parseFloat(item.quantity);
+            const qtyStr = (qtyNum % 1 === 0 ? qtyNum.toFixed(0) : qtyNum.toFixed(2)) + ' KG';
+
+            drawText(fName || '', PAD, y, { size: 22, weight: '700', align: 'left' });
+            drawText(qtyStr, 420, y, { size: 22, weight: '700', align: 'right' });
+            drawText(fmtNum(item.price), 580, y, { size: 22, weight: '700', align: 'right' });
+            drawText(fmtNum(item.total), W - PAD, y, { size: 22, weight: '900', align: 'right' });
+            
+            y += LINE_H / 2;
         }
-        y += LINE_H;
-        
-        // Horizontal line for each flower row
-        ctx.beginPath();
-        ctx.setLineDash([]);
-        ctx.moveTo(PAD, y);
-        ctx.lineTo(W - PAD, y);
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 0.5; // Thin line for rows
-        ctx.stroke();
     }
 
-    // Draw vertical grid lines for the full table height
-    ctx.lineWidth = 1.0;
-    ctx.setLineDash([]);
-    ctx.strokeStyle = '#000';
-    [cols[1], cols[2], cols[3], cols[4]].forEach(x => {
-        ctx.beginPath();
-        ctx.moveTo(x, tableStartY - 45); // Start from header top
-        ctx.lineTo(x, y);
-        ctx.stroke();
-    });
+    // Divider line below table rows
+    ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(PAD, y);
+    ctx.lineTo(W - PAD, y);
+    ctx.stroke();
 
-    // Outer border for the entire data area
-    rect(PAD, tableStartY, W - PAD*2, y - tableStartY);
+    // 7. Totals Block (No surrounding boxes, simple and clean spacing)
+    const totalsLabels = lang === 'ta'
+        ? {
+            todaySales: 'இன்றைய கொள்முதல்',
+            oldBalance: 'ஆரம்ப பற்று/இருப்பு',
+            totalSum: 'மொத்தம்',
+            cashRec: 'வரவு',
+            finalBal: 'மீதம்',
+        }
+        : {
+            todaySales: 'Today\'s Purchase',
+            oldBalance: 'Opening Balance',
+            totalSum: 'Total',
+            cashRec: 'Received',
+            finalBal: 'Remaining',
+        };
 
-    // 5b. Total Sales
-    ctx.lineWidth = 1.5;
-    rect(PAD, y, W - PAD*2, 50);
-    drawText(labels.totalSalesLabel || 'Total Sales', PAD + 20, y + 25, { size: 24, weight: '800' });
-    drawText(fmtNum(salesTotal), W - PAD - 20, y + 25, { size: 28, weight: '800', align: 'right', color: '#b91c1c' });
-    y += 70;
+    const drawTotalRow = (label, val, isBold = false) => {
+        y += 45;
+        drawText(label, PAD, y, { size: 24, weight: isBold ? '900' : '700', align: 'left' });
+        drawText(fmtNum(val), W - PAD, y, { size: 26, weight: '900', align: 'right' });
+    };
 
-    // 6. Grand Total
-    ctx.lineWidth = 3.0;
-    rect(PAD, y, W - PAD*2, 70);
-    drawText(grandTotalLabel, PAD + 20, y + 35, { size: 28, weight: '900' });
-    drawText(`${fmtNum(absGrandTotal, 2)}`, W - PAD - 20, y + 35, { size: 36, weight: '900', align: 'right' });
-    y += 90;
-    ctx.lineWidth = 1.5;
+    drawTotalRow(totalsLabels.todaySales, salesTotal);
+    drawTotalRow(totalsLabels.oldBalance, prevBalance);
 
-    drawText('🌹 நன்றி (Thank You) 🌹', W/2, y, { size: 28, align: 'center' });
+    y += 30;
+    ctx.beginPath();
+    ctx.moveTo(PAD, y);
+    ctx.lineTo(W - PAD, y);
+    ctx.stroke();
+
+    const totalSumVal = salesTotal + prevBalance;
+    drawTotalRow(totalsLabels.totalSum, totalSumVal, true);
+
+    const cashReceivedVal = paymentsTotal + cashLess;
+    drawTotalRow(totalsLabels.cashRec, cashReceivedVal);
+
+    y += 30;
+    ctx.beginPath();
+    ctx.moveTo(PAD, y);
+    ctx.lineTo(W - PAD, y);
+    ctx.stroke();
+
+    const remainingBalanceVal = totalSumVal - cashReceivedVal;
+    drawTotalRow(totalsLabels.finalBal, remainingBalanceVal, true);
+
+    y += 30;
+    ctx.beginPath();
+    ctx.moveTo(PAD, y);
+    ctx.lineTo(W - PAD, y);
+    ctx.stroke();
+
+    // Footer (Centered)
+    y += 60;
+    const footerText = lang === 'ta' ? '🌸 நன்றி (Thank You) 🌸' : '🌸 Thank You 🌸';
+    drawText(footerText, W / 2, y, { size: 22, align: 'center', weight: '700' });
 
     return new Promise((resolve) => {
         canvas.toBlob((blob) => {

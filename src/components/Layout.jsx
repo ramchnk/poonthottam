@@ -5,7 +5,7 @@ import Petals from './Petals';
 import { useTenant } from '../utils/TenantContext';
 
 // ── Language Context ──────────────────────────────────────────────────────────
-export const LangContext = createContext({ lang: 'en', t: (k) => k });
+export const LangContext = createContext({ lang: 'ta', t: (k) => k });
 
 const strings = {
   en: {
@@ -281,6 +281,20 @@ const Layout = () => {
 
   // ── Sidebar state ──
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => sessionStorage.getItem('fm_sidebar_collapsed') === 'true');
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    setIsDrawerOpen(false);
+  }, [location.pathname]);
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(prev => {
@@ -291,7 +305,7 @@ const Layout = () => {
   };
 
   // ── Language state (persisted) ──
-  const [lang, setLang] = useState(() => sessionStorage.getItem('fm_lang') || 'en');
+  const [lang, setLang] = useState(() => sessionStorage.getItem('fm_lang') || 'ta');
 
   // ── Toaster states ──
   const [toasts, setToasts] = useState([]);
@@ -388,82 +402,134 @@ const Layout = () => {
       <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc', fontFamily: 'var(--font-sans)', width: '100vw', overflowX: 'hidden', position: 'relative' }}>
         <Petals />
 
-        {/* Collapsible Left Sidebar */}
-        <aside style={{
-          width: isSidebarCollapsed ? '72px' : '260px',
-          flexShrink: 0,
-          background: '#ffffff',
-          borderRight: '1px solid rgba(0,0,0,0.06)',
-          boxShadow: '4px 0 16px rgba(0,0,0,0.02)',
-          display: 'flex',
-          flexDirection: 'column',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          zIndex: 60,
-          overflow: 'hidden'
-        }}>
-          {/* Sidebar Header / Logo */}
-          <div style={{
-            height: '68px',
+        {/* Collapsible Left Sidebar (Desktop Only) */}
+        {!isMobile && (
+          <aside style={{
+            width: isSidebarCollapsed ? '72px' : '260px',
+            flexShrink: 0,
+            background: '#ffffff',
+            borderRight: '1px solid rgba(0,0,0,0.06)',
+            boxShadow: '4px 0 16px rgba(0,0,0,0.02)',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: isSidebarCollapsed ? 'center' : 'space-between',
-            padding: isSidebarCollapsed ? '0' : '0 20px',
-            borderBottom: '1px solid rgba(0,0,0,0.05)',
-            boxSizing: 'border-box'
+            flexDirection: 'column',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            position: 'sticky',
+            top: 0,
+            height: '100vh',
+            zIndex: 60,
+            overflow: 'hidden'
           }}>
-            {!isSidebarCollapsed && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onDoubleClick={() => {
-                setDevError('');
-                setDevPassword('');
-                setShowDevModal(true);
-              }}>
-                <span style={{ fontSize: '24px' }}>🌸</span>
-                <span style={{ fontWeight: 800, fontSize: '15px', color: '#0f172a', whiteSpace: 'nowrap' }}>
-                  {tenantData?.name || 'SVM Flowers'}
-                </span>
-              </div>
-            )}
-            {isSidebarCollapsed && (
-              <span style={{ fontSize: '28px', cursor: 'pointer' }} onDoubleClick={() => {
-                setDevError('');
-                setDevPassword('');
-                setShowDevModal(true);
-              }}>🌸</span>
-            )}
-            <button 
-              onClick={toggleSidebar}
-              style={{
-                background: '#f1f5f9',
-                border: 'none',
-                borderRadius: '8px',
-                width: '28px',
-                height: '28px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#64748b',
-                transition: 'all 0.2s',
-                marginLeft: isSidebarCollapsed ? '0' : '8px'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'}
-              onMouseLeave={e => e.currentTarget.style.background = '#f1f5f9'}
-            >
-              {isSidebarCollapsed ? '❯' : '❮'}
-            </button>
-          </div>
+            {/* Sidebar Header / Logo */}
+            <div style={{
+              height: '68px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: isSidebarCollapsed ? 'center' : 'space-between',
+              padding: isSidebarCollapsed ? '0' : '0 20px',
+              borderBottom: '1px solid rgba(0,0,0,0.05)',
+              boxSizing: 'border-box'
+            }}>
+              {!isSidebarCollapsed && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onDoubleClick={() => {
+                  setDevError('');
+                  setDevPassword('');
+                  setShowDevModal(true);
+                }}>
+                  <span style={{ fontSize: '24px' }}>🌸</span>
+                  <span style={{ fontWeight: 800, fontSize: '15px', color: '#0f172a', whiteSpace: 'nowrap' }}>
+                    {tenantData?.name || 'SVM Flowers'}
+                  </span>
+                </div>
+              )}
+              {isSidebarCollapsed && (
+                <span style={{ fontSize: '28px', cursor: 'pointer' }} onDoubleClick={() => {
+                  setDevError('');
+                  setDevPassword('');
+                  setShowDevModal(true);
+                }}>🌸</span>
+              )}
+              <button 
+                onClick={toggleSidebar}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '8px',
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  transition: 'all 0.2s',
+                  marginLeft: isSidebarCollapsed ? '0' : '8px'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'}
+                onMouseLeave={e => e.currentTarget.style.background = '#f1f5f9'}
+              >
+                {isSidebarCollapsed ? '❯' : '❮'}
+              </button>
+            </div>
 
-          {/* Navigation Links */}
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px', padding: '16px 12px', flex: 1 }}>
-            {menuItems.map(item => {
-              const isActive = location.pathname.includes(item.path);
-              return (
+            {/* Navigation Links */}
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px', padding: '16px 12px', flex: 1 }}>
+              {menuItems.map(item => {
+                const isActive = location.pathname.includes(item.path);
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => navigate(item.path)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: isSidebarCollapsed ? 'center' : 'flex-start',
+                      gap: isSidebarCollapsed ? '0' : '12px',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: isActive ? 'linear-gradient(135deg, #10b981, #059669)' : 'transparent',
+                      color: isActive ? '#ffffff' : '#64748b',
+                      cursor: 'pointer',
+                      fontWeight: 750,
+                      fontSize: '13.5px',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      textAlign: 'left',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: isActive ? '0 4px 12px rgba(16,185,129,0.2)' : 'none'
+                    }}
+                    onMouseEnter={e => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = '#f8fafc';
+                        e.currentTarget.style.color = '#0f172a';
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#64748b';
+                      }
+                    }}
+                    title={isSidebarCollapsed ? item.label : ''}
+                  >
+                    <span style={{ fontSize: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', flexShrink: 0 }}>
+                      {item.icon}
+                    </span>
+                    {!isSidebarCollapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Developer Menu at the bottom */}
+            {showDevMenu && (
+              <div style={{ borderTop: '1px solid rgba(0,0,0,0.05)', padding: '16px 12px', marginTop: 'auto' }}>
                 <button
-                  key={item.label}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => {
+                    setDevError('');
+                    setDevPassword('');
+                    setShowDevModal(true);
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -472,8 +538,8 @@ const Layout = () => {
                     padding: '10px 14px',
                     borderRadius: '10px',
                     border: 'none',
-                    background: isActive ? 'linear-gradient(135deg, #10b981, #059669)' : 'transparent',
-                    color: isActive ? '#ffffff' : '#64748b',
+                    background: location.pathname.includes('/app/settings') ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'transparent',
+                    color: location.pathname.includes('/app/settings') ? '#ffffff' : '#64748b',
                     cursor: 'pointer',
                     fontWeight: 750,
                     fontSize: '13.5px',
@@ -481,81 +547,180 @@ const Layout = () => {
                     boxSizing: 'border-box',
                     textAlign: 'left',
                     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    boxShadow: isActive ? '0 4px 12px rgba(16,185,129,0.2)' : 'none'
+                    boxShadow: location.pathname.includes('/app/settings') ? '0 4px 12px rgba(99,102,241,0.2)' : 'none'
                   }}
                   onMouseEnter={e => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = '#f8fafc';
-                      e.currentTarget.style.color = '#0f172a';
+                    if (!location.pathname.includes('/app/settings')) {
+                      e.currentTarget.style.background = '#f5f3ff';
+                      e.currentTarget.style.color = '#4f46e5';
                     }
                   }}
                   onMouseLeave={e => {
-                    if (!isActive) {
+                    if (!location.pathname.includes('/app/settings')) {
                       e.currentTarget.style.background = 'transparent';
                       e.currentTarget.style.color = '#64748b';
                     }
                   }}
-                  title={isSidebarCollapsed ? item.label : ''}
+                  title={isSidebarCollapsed ? (lang === 'ta' ? 'டெவலப்பர்' : 'Developer') : ''}
                 >
                   <span style={{ fontSize: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', flexShrink: 0 }}>
-                    {item.icon}
+                    👨💻
                   </span>
-                  {!isSidebarCollapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+                  {!isSidebarCollapsed && <span style={{ flex: 1 }}>{lang === 'ta' ? 'டெவலப்பர்' : 'Developer'}</span>}
                 </button>
-              );
-            })}
-          </nav>
+              </div>
+            )}
+          </aside>
+        )}
 
-          {/* Developer Menu at the bottom */}
-          {showDevMenu && (
-            <div style={{ borderTop: '1px solid rgba(0,0,0,0.05)', padding: '16px 12px', marginTop: 'auto' }}>
-              <button
-                onClick={() => {
-                  setDevError('');
-                  setDevPassword('');
-                  setShowDevModal(true);
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: isSidebarCollapsed ? 'center' : 'flex-start',
-                  gap: isSidebarCollapsed ? '0' : '12px',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: location.pathname.includes('/app/settings') ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'transparent',
-                  color: location.pathname.includes('/app/settings') ? '#ffffff' : '#64748b',
-                  cursor: 'pointer',
-                  fontWeight: 750,
-                  fontSize: '13.5px',
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  textAlign: 'left',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: location.pathname.includes('/app/settings') ? '0 4px 12px rgba(99,102,241,0.2)' : 'none'
-                }}
-                onMouseEnter={e => {
-                  if (!location.pathname.includes('/app/settings')) {
-                    e.currentTarget.style.background = '#f5f3ff';
-                    e.currentTarget.style.color = '#4f46e5';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!location.pathname.includes('/app/settings')) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#64748b';
-                  }
-                }}
-                title={isSidebarCollapsed ? (lang === 'ta' ? 'டெவலப்பர்' : 'Developer') : ''}
-              >
-                <span style={{ fontSize: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', flexShrink: 0 }}>
-                  👨💻
-                </span>
-                {!isSidebarCollapsed && <span style={{ flex: 1 }}>{lang === 'ta' ? 'டெவலப்பர்' : 'Developer'}</span>}
-              </button>
+        {/* Mobile Navigation Drawer Overlay & Content */}
+        {isMobile && isDrawerOpen && (
+          <>
+            <div 
+              className="mobile-drawer-overlay" 
+              onClick={() => setIsDrawerOpen(false)}
+            />
+            <div className="mobile-drawer">
+              {/* Logo / Header */}
+              <div style={{
+                height: '68px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 20px',
+                borderBottom: '1px solid rgba(0,0,0,0.05)',
+                boxSizing: 'border-box'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '24px' }}>🌸</span>
+                  <span style={{ fontWeight: 800, fontSize: '15px', color: '#0f172a' }}>
+                    {tenantData?.name || 'SVM Flowers'}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => setIsDrawerOpen(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#64748b' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px', padding: '16px 12px', flex: 1, overflowY: 'auto' }}>
+                {menuItems.map(item => {
+                  const isActive = location.pathname.includes(item.path);
+                  return (
+                    <button
+                      key={item.label}
+                      onClick={() => {
+                        navigate(item.path);
+                        setIsDrawerOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: 'none',
+                        background: isActive ? 'linear-gradient(135deg, #10b981, #059669)' : 'transparent',
+                        color: isActive ? '#ffffff' : '#64748b',
+                        cursor: 'pointer',
+                        fontWeight: 750,
+                        fontSize: '13.5px',
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        textAlign: 'left',
+                        transition: 'all 0.2s',
+                        boxShadow: isActive ? '0 4px 12px rgba(16,185,129,0.2)' : 'none'
+                      }}
+                    >
+                      <span style={{ fontSize: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', flexShrink: 0 }}>
+                        {item.icon}
+                      </span>
+                      <span style={{ flex: 1 }}>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {/* Mobile Drawer Footer Actions (Language, Settings, Logout) */}
+              <div style={{ borderTop: '1px solid rgba(0,0,0,0.05)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', background: '#f8fafc' }}>
+                {/* Language selection */}
+                <div style={{
+                  display:'flex', alignItems:'center', gap:'10px',
+                  padding:'10px 14px', background:'#ffffff',
+                  border:'1.5px solid #e2e8f0', borderRadius:'12px'
+                }}>
+                  <Globe size={16} style={{color:'#10b981', flexShrink:0}} />
+                  <select
+                    value={lang}
+                    onChange={handleLangChange}
+                    style={{
+                      background:'transparent', outline:'none', border:'none',
+                      cursor:'pointer', color:'#475569', fontWeight:700,
+                      fontFamily:'var(--font-sans)', fontSize: '13px',
+                      padding:0, width:'100%'
+                    }}
+                  >
+                    <option value="ta">தமிழ் (Tamil)</option>
+                    <option value="en">English (EN)</option>
+                  </select>
+                </div>
+
+                {/* Settings if admin/local */}
+                {showDevMenu && (
+                  <button
+                    onClick={() => {
+                      setIsDrawerOpen(false);
+                      setDevError('');
+                      setDevPassword('');
+                      setShowDevModal(true);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: location.pathname.includes('/app/settings') ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'transparent',
+                      color: location.pathname.includes('/app/settings') ? '#ffffff' : '#64748b',
+                      cursor: 'pointer',
+                      fontWeight: 750,
+                      fontSize: '13.5px',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <span style={{ fontSize: '18px' }}>⚙️</span>
+                    <span style={{ flex: 1 }}>{lang === 'ta' ? 'அமைப்புகள்' : 'Settings'}</span>
+                  </button>
+                )}
+
+                {/* Logout Button */}
+                <button
+                  onClick={() => {
+                    setIsDrawerOpen(false);
+                    handleLogout();
+                  }}
+                  style={{
+                    display:'flex', alignItems:'center', justifyContent: 'center', gap:'8px',
+                    padding:'12px', background:'#fff1f2',
+                    border:'1.5px solid #fecdd3', borderRadius:'12px',
+                    color:'#f43f5e', fontFamily:'var(--font-sans)',
+                    fontWeight:800, fontSize:'13px', cursor:'pointer',
+                    transition:'all 0.2s', width: '100%'
+                  }}
+                >
+                  <LogOut size={14} />
+                  {lang === 'ta' ? 'வெளியேறு' : 'LOGOUT'}
+                </button>
+              </div>
             </div>
-          )}
-        </aside>
+          </>
+        )}
 
         {/* Content Area Wrapper */}
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: '100vh' }}>
@@ -568,27 +733,45 @@ const Layout = () => {
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
             borderBottom: '1px solid rgba(0,0,0,0.06)',
             boxShadow: '0 1px 0 rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03)',
-            display: 'flex', alignItems: 'center', padding: '0 28px',
+            display: 'flex', alignItems: 'center', padding: isMobile ? '0 16px' : '0 28px',
             position: 'sticky', top: 0, zIndex: 50,
             justifyContent: 'space-between'
           }}>
 
-            {/* Left: Back button or Welcome */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            {/* Left: Hamburger menu toggle / Back button */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {isMobile && (
+                <button
+                  onClick={() => setIsDrawerOpen(true)}
+                  style={{
+                    background: '#f1f5f9', border: 'none', borderRadius: '8px',
+                    width: '36px', height: '36px', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', color: '#475569', fontSize: '18px'
+                  }}
+                >
+                  ☰
+                </button>
+              )}
               {!isDashboard && (
                 <button
                   onClick={() => navigate(getParentRoute())}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95"
                   style={{background:'#f8fafc', border:'1.5px solid #e2e8f0', color:'#64748b', fontFamily:'var(--font-sans)'}}
                   onMouseEnter={e => Object.assign(e.currentTarget.style, {background:'#ecfdf5', borderColor:'#6ee7b7', color:'#047857'})}
                   onMouseLeave={e => Object.assign(e.currentTarget.style, {background:'#f8fafc', borderColor:'#e2e8f0', color:'#64748b'})}
                 >
-                  <ChevronLeft size={15} /> {t('back')}
+                  <ChevronLeft size={13} /> {t('back')}
                 </button>
               )}
-              {isDashboard && (
+              {isDashboard && !isMobile && (
                 <span style={{ fontWeight: 850, fontSize: '15px', color: '#1e293b' }}>
                   {lang === 'ta' ? `வணக்கம், ${tenantData?.name || 'வாடிக்கையாளர்'}` : `Welcome, ${tenantData?.name || 'Owner'}`}
+                </span>
+              )}
+              {isDashboard && isMobile && (
+                <span style={{ fontWeight: 800, fontSize: '14px', color: '#1e293b' }}>
+                  🌸 SVM Flowers
                 </span>
               )}
             </div>
@@ -598,81 +781,87 @@ const Layout = () => {
               {getTitle() && (
                 <div style={{
                   display:'flex', alignItems:'center', gap:'8px',
-                  padding:'6px 18px',
+                  padding: isMobile ? '4px 12px' : '6px 18px',
                   background:'linear-gradient(135deg,#ecfdf5,#f0fdf4)',
                   borderRadius:'100px', border:'1px solid #a7f3d0',
-                  boxShadow:'0 1px 3px rgba(16,185,129,0.1)'
+                  boxShadow:'0 1px 3px rgba(16,185,129,0.1)',
+                  maxWidth: isMobile ? '160px' : 'none',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
                 }}>
-                  <span style={{fontFamily:'var(--font-display)', fontWeight:750, fontSize:'13.5px', color:'#065f46', letterSpacing:'-0.01em'}}>
+                  <span style={{fontFamily:'var(--font-display)', fontWeight:750, fontSize: isMobile ? '11px' : '13.5px', color:'#065f46', letterSpacing:'-0.01em', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>
                     {getTitle()}
                   </span>
                 </div>
               )}
             </div>
 
-            {/* Right: Actions */}
-            <div style={{width:'auto', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'flex-end', gap:'8px'}}>
-              {/* Language picker */}
-              <div style={{
-                display:'flex', alignItems:'center', gap:'5px',
-                padding:'7px 11px', background:'#f8fafc',
-                border:'1.5px solid #e2e8f0', borderRadius:'10px'
-              }}>
-                <Globe size={13} style={{color:'#10b981', flexShrink:0}} />
-                <select
-                  value={lang}
-                  onChange={handleLangChange}
-                  style={{
-                    background:'transparent', outline:'none', border:'none',
-                    cursor:'pointer', color:'#475569', fontWeight:600,
-                    fontFamily:'var(--font-sans)', fontSize:'12px',
-                    padding:0, width:'auto'
-                  }}
-                >
-                  <option value="en">EN</option>
-                  <option value="ta">தமிழ்</option>
-                </select>
-              </div>
-
-              {/* Settings button */}
-              <button
-                onClick={() => navigate('/app/business-info')}
-                title={lang === 'ta' ? 'அமைப்புகள்' : 'Settings'}
-                style={{
-                  display:'flex', alignItems:'center', justifyContent: 'center',
-                  width: '34px', height: '34px', background:'#f8fafc',
-                  border:'1.5px solid #e2e8f0', borderRadius:'10px',
-                  color:'#475569', cursor:'pointer', transition:'all 0.2s'
-                }}
-                onMouseEnter={e => Object.assign(e.currentTarget.style, {background:'#f1f5f9', borderColor:'#cbd5e1'})}
-                onMouseLeave={e => Object.assign(e.currentTarget.style, {background:'#f8fafc', borderColor:'#e2e8f0'})}
-              >
-                <span style={{ fontSize: '15px' }}>⚙️</span>
-              </button>
-
-              {/* Logout */}
-              <button
-                onClick={handleLogout}
-                title="Sign Out"
-                style={{
+            {/* Right: Actions (Desktop Only, hidden on Mobile) */}
+            {!isMobile ? (
+              <div style={{width:'auto', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'flex-end', gap:'8px'}}>
+                {/* Language picker */}
+                <div style={{
                   display:'flex', alignItems:'center', gap:'5px',
-                  padding:'7px 13px', background:'#fff1f2',
-                  border:'1.5px solid #fecdd3', borderRadius:'10px',
-                  color:'#f43f5e', fontFamily:'var(--font-sans)',
-                  fontWeight:700, fontSize:'12px', cursor:'pointer',
-                  letterSpacing:'0.04em', textTransform:'uppercase',
-                  transition:'all 0.2s'
-                }}
-                onMouseEnter={e => Object.assign(e.currentTarget.style, {background:'#f43f5e', color:'white', borderColor:'#f43f5e', transform:'translateY(-1px)', boxShadow:'0 4px 12px rgba(244,63,94,0.3)'})}
-                onMouseLeave={e => Object.assign(e.currentTarget.style, {background:'#fff1f2', color:'#f43f5e', borderColor:'#fecdd3', transform:'none', boxShadow:'none'})}
-              >
-                <LogOut size={13} />
-                Logout
-              </button>
-            </div>
+                  padding:'7px 11px', background:'#f8fafc',
+                  border:'1.5px solid #e2e8f0', borderRadius:'10px'
+                }}>
+                  <Globe size={13} style={{color:'#10b981', flexShrink:0}} />
+                  <select
+                    value={lang}
+                    onChange={handleLangChange}
+                    style={{
+                      background:'transparent', outline:'none', border:'none',
+                      cursor:'pointer', color:'#475569', fontWeight:600,
+                      fontFamily:'var(--font-sans)', fontSize:'12px',
+                      padding:0, width:'auto'
+                    }}
+                  >
+                    <option value="ta">தமிழ்</option>
+                    <option value="en">EN</option>
+                  </select>
+                </div>
+
+                {/* Settings button */}
+                <button
+                  onClick={() => navigate('/app/business-info')}
+                  title={lang === 'ta' ? 'அமைப்புகள்' : 'Settings'}
+                  style={{
+                    display:'flex', alignItems:'center', justifyContent: 'center',
+                    width: '34px', height: '34px', background:'#f8fafc',
+                    border:'1.5px solid #e2e8f0', borderRadius:'10px',
+                    color:'#475569', cursor:'pointer', transition:'all 0.2s'
+                  }}
+                  onMouseEnter={e => Object.assign(e.currentTarget.style, {background:'#f1f5f9', borderColor:'#cbd5e1'})}
+                  onMouseLeave={e => Object.assign(e.currentTarget.style, {background:'#f8fafc', borderColor:'#e2e8f0'})}
+                >
+                  <span style={{ fontSize: '15px' }}>⚙️</span>
+                </button>
+
+                {/* Logout */}
+                <button
+                  onClick={handleLogout}
+                  title="Sign Out"
+                  style={{
+                    display:'flex', alignItems:'center', gap:'5px',
+                    padding:'7px 13px', background:'#fff1f2',
+                    border:'1.5px solid #fecdd3', borderRadius:'10px',
+                    color:'#f43f5e', fontFamily:'var(--font-sans)',
+                    fontWeight:700, fontSize:'12px', cursor:'pointer',
+                    letterSpacing:'0.04em', textTransform:'uppercase',
+                    transition:'all 0.2s'
+                  }}
+                  onMouseEnter={e => Object.assign(e.currentTarget.style, {background:'#f43f5e', color:'white', borderColor:'#f43f5e', transform:'translateY(-1px)', boxShadow:'0 4px 12px rgba(244,63,94,0.3)'})}
+                  onMouseLeave={e => Object.assign(e.currentTarget.style, {background:'#fff1f2', color:'#f43f5e', borderColor:'#fecdd3', transform:'none', boxShadow:'none'})}
+                >
+                  <LogOut size={13} />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div style={{ width: '36px' }} />
+            )}
           </header>
 
-          <main style={{flex:1, padding:'28px', position:'relative', zIndex:10, overflowX:'hidden'}}>
+          <main style={{flex:1, padding: isMobile ? '12px' : '28px', position:'relative', zIndex:10, overflowX:'hidden'}}>
             <div style={{maxWidth:'1700px', margin:'0 auto', width:'100%'}}>
               <Outlet />
             </div>
